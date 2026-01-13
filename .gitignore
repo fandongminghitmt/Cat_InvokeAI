@@ -1,0 +1,11 @@
+.venv/
+SDXL/
+models/
+databases/
+outputs/
+temp_build/
+.update_system/
+*.pyc
+__pycache__/
+.env
+invokeai.yaml

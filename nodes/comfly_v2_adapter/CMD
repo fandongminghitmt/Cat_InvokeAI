@@ -1,0 +1,2 @@
+#手动刷新DNS
+ipconfig /flushdns
