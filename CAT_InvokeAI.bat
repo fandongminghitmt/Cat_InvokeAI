@@ -1,16 +1,14 @@
 @echo off
 
-cd /d "D:\Cat_InvokeAI"
+set "PYTHONPATH=%~dp0invokeai"
+set "INVOKEAI_ROOT=%~dp0"
 
-set "PYTHONPATH=D:\Cat_InvokeAI\invokeai"
-set "INVOKEAI_ROOT=D:\Cat_InvokeAI"
-
-"D:\Cat_InvokeAI\.venv\Scripts\python.exe" "D:\Cat_InvokeAI\.update_system\check_update.py"
+"%~dp0.venv\Scripts\python.exe" "%~dp0.update_system\check_update.py"
 
 echo [Starting] InvokeAI Source Mode...
-echo Python Env: D:\Cat_InvokeAI\.venv
-echo Source: D:\Cat_InvokeAI\invokeai
+echo Python Env: .venv
+echo Source: invokeai
 
-"D:\Cat_InvokeAI\.venv\Scripts\python.exe" "D:\Cat_InvokeAI\invokeai\invokeai\app\run_app.py"
+"%~dp0.venv\Scripts\python.exe" "%~dp0invokeai\invokeai\app\run_app.py"
 
 pause
