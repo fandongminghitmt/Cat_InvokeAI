@@ -1,0 +1,346 @@
+[build-system]
+requires = ["setuptools", "pip", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "InvokeAI"
+description = "A full-featured AI-assisted image generation environment designed for creatives and enthusiasts."
+requires-python = ">=3.11, <3.13"
+readme = { content-type = "text/markdown", file = "README.md" }
+keywords = ["stable-diffusion", "AI"]
+dynamic = ["version"]
+license = { file = "LICENSE" }
+authors = [{ name = "Invoke", email = "support@invoke.ai" }]
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Environment :: GPU',
+  'Environment :: GPU :: NVIDIA CUDA',
+  'Environment :: MacOS X',
+  'Intended Audience :: End Users/Desktop',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: Apache Software License',
+  'Operating System :: POSIX :: Linux',
+  'Operating System :: MacOS',
+  'Operating System :: Microsoft :: Windows',
+  'Programming Language :: Python :: 3 :: Only',
+  'Programming Language :: Python :: 3.12',
+  'Topic :: Artistic Software',
+  'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
+  'Topic :: Internet :: WWW/HTTP :: WSGI :: Server',
+  'Topic :: Multimedia :: Graphics',
+  'Topic :: Scientific/Engineering :: Artificial Intelligence',
+  'Topic :: Scientific/Engineering :: Image Processing',
+]
+dependencies = [
+  # Core generation dependencies, pinned for reproducible builds.
+  "accelerate",
+  "bitsandbytes; sys_platform!='darwin'",
+  "compel==2.1.1",
+  "diffusers[torch]==0.36.0",
+  "gguf",
+  "mediapipe==0.10.14",                   # needed for "mediapipeface" controlnet model
+  "numpy<2.0.0",
+  "onnx==1.16.1",
+  "onnxruntime==1.19.2",
+  "opencv-contrib-python",
+  "safetensors",
+  "sentencepiece==0.2.0",                 # 0.2.1 coredumps windows when loading t5 tokenizer
+  "spandrel",
+  "torch~=2.7.0",                         # torch and related dependencies are loosely pinned, will respect requirement of `diffusers[torch]`
+  "torchsde",                             # diffusers needs this for SDE solvers, but it is not an explicit dep of diffusers
+  "torchvision",
+  "transformers>=4.56.0",
+
+  # Core application dependencies, pinned for reproducible builds.
+  "fastapi-events",
+  # FastAPI 0.119.0 breaks OpenAPI schema generation for the AnyInvocation class. It's not clear if this is an Invoke,
+  # FastAPI or pydantic bug. Probably Invoke's, because we are doing something unusual with AnyInvocation. 0.118.3 is
+  # the last known-good version.
+  "fastapi== 0.118.3",
+  "huggingface-hub",
+  "pydantic-settings",
+  "pydantic",
+  "python-socketio",
+  "uvicorn[standard]",
+
+  # Auxiliary dependencies, pinned only if necessary.
+  "blake3",
+  "Deprecated",
+  "dnspython",
+  "dynamicprompts",
+  "einops",
+  "picklescan",
+  "pillow",
+  "prompt-toolkit",
+  "pypatchmatch",
+  "python-multipart",
+  "requests",
+  "semver~=3.0.1",
+  "PyWavelets",
+]
+
+[project.optional-dependencies]
+"xformers" = [
+  # Core generation dependencies, pinned for reproducible builds.
+  "xformers>=0.0.28.post1; sys_platform!='darwin'",
+  # torch 2.4+cu carries its own triton dependency
+]
+
+"cpu" = ["torch==2.7.1+cpu", "torchvision==0.22.1+cpu"]
+"cuda" = ["torch==2.7.1+cu128", "torchvision==0.22.1+cu128"]
+"rocm" = [
+  "torch==2.7.1+rocm6.3",
+  "torchvision==0.22.1+rocm6.3",
+  "pytorch-triton-rocm",
+]
+
+"onnx" = ["onnxruntime"]
+"onnx-cuda" = ["onnxruntime-gpu"]
+"onnx-directml" = ["onnxruntime-directml"]
+"dist" = ["pip-tools", "pipdeptree", "twine"]
+"docs" = [
+  "mkdocs-material>=9.5.36",
+  "mkdocs-git-revision-date-localized-plugin",
+  "mkdocs-redirects",
+  "mkdocstrings[python]>=0.26.1",
+]
+"dev" = ["jurigged", "pudb", "snakeviz", "gprof2dot"]
+"test" = [
+  "ruff~=0.11.2",
+  "ruff-lsp~=0.0.62",
+  "mypy",
+  "pre-commit",
+  "pytest>6.0.0",
+  "pytest-cov",
+  "pytest-timeout",
+  "pytest-datadir",
+  "requests_testadapter",
+  "httpx",
+  "polyfactory==2.19.0",
+  "humanize==4.12.1",
+]
+
+[tool.uv]
+# Prevent opencv-python from ever being chosen during dependency resolution.
+# This prevents conflicts with opencv-contrib-python, which Invoke requires.
+override-dependencies = ["opencv-python; sys_platform=='never'"]
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }, { extra = "rocm" }]]
+index-strategy = "unsafe-best-match"
+
+[tool.uv.sources]
+torch = [
+  { index = "torch-cpu", extra = "cpu" },
+  { index = "torch-cuda", extra = "cuda" },
+  { index = "torch-rocm", extra = "rocm" },
+]
+torchvision = [
+  { index = "torch-cpu", extra = "cpu" },
+  { index = "torch-cuda", extra = "cuda" },
+  { index = "torch-rocm", extra = "rocm" },
+]
+pytorch-triton-rocm = [
+  { index = "torch-rocm", extra = "rocm", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "torch-cuda"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "torch-rocm"
+url = "https://download.pytorch.org/whl/rocm6.3"
+explicit = true
+
+[project.scripts]
+"invokeai-web" = "invokeai.app.run_app:run_app"
+
+[project.urls]
+"Homepage" = "https://invoke-ai.github.io/InvokeAI/"
+"Documentation" = "https://invoke-ai.github.io/InvokeAI/"
+"Source" = "https://github.com/invoke-ai/InvokeAI/"
+"Bug Reports" = "https://github.com/invoke-ai/InvokeAI/issues"
+"Discord" = "https://discord.gg/ZmtBAhwWhy"
+
+[tool.setuptools.dynamic]
+version = { attr = "invokeai.version.__version__" }
+
+[tool.setuptools.packages.find]
+"where" = ["."]
+"include" = [
+  "invokeai.assets.fonts*",
+  "invokeai.version*",
+  "invokeai.generator*",
+  "invokeai.backend*",
+  "invokeai.frontend*",
+  "invokeai.frontend.web.dist*",
+  "invokeai.frontend.web.static*",
+  "invokeai.configs*",
+  "invokeai.app*",
+  "invokeai.invocation_api*",
+]
+
+[tool.setuptools.package-data]
+"invokeai.app.assets" = ["**/*.png"]
+"invokeai.app.services.workflow_records.default_workflows" = ["*.json"]
+"invokeai.app.services.style_preset_records" = ["*.json"]
+"invokeai.app.services.style_preset_images.default_style_preset_images" = [
+  "*.png",
+]
+"invokeai.assets.fonts" = ["**/*.ttf"]
+"invokeai.backend" = ["**.png", "**/*.icc"]
+"invokeai.configs" = ["*.example", "**/*.yaml", "*.txt"]
+"invokeai.frontend.web.dist" = ["**"]
+"invokeai.frontend.web.static" = ["**"]
+"invokeai.app.invocations" = ["**"]
+
+#=== Begin: PyTest and Coverage
+[tool.pytest.ini_options]
+addopts = "--cov-report term --cov-report html --cov-report xml --strict-markers -m \"not slow\""
+markers = [
+  "slow: Marks tests as slow. Disabled by default. To run all tests, use -m \"\". To run only slow tests, use -m \"slow\".",
+  "timeout: Marks the timeout override.",
+]
+[tool.coverage.run]
+branch = true
+source = ["invokeai"]
+omit = ["*tests*", "*migrations*", ".venv/*", "*.env"]
+[tool.coverage.report]
+show_missing = true
+fail_under = 85     # let's set something sensible on Day 1 ...
+[tool.coverage.json]
+output = "coverage/coverage.json"
+pretty_print = true
+[tool.coverage.html]
+directory = "coverage/html"
+[tool.coverage.xml]
+output = "coverage/index.xml"
+#=== End: PyTest and Coverage
+
+#=== Begin: Ruff
+[tool.ruff]
+line-length = 120
+exclude = [
+  ".git",
+  "__pycache__",
+  "build",
+  "dist",
+  "invokeai/frontend/web/node_modules/",
+  ".venv*",
+  "*.ipynb",
+  "invokeai/backend/image_util/mediapipe_face/", # External code
+  "invokeai/backend/image_util/mlsd/",           # External code
+  "invokeai/backend/image_util/normal_bae/",     # External code
+  "invokeai/backend/image_util/pidi/",           # External code
+  "invokeai/backend/image_util/imwatermark/",    # External code
+]
+
+[tool.ruff.lint]
+ignore = [
+  "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
+  "C901", # https://docs.astral.sh/ruff/rules/complex-structure/
+  "B008", # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
+  "B904", # https://docs.astral.sh/ruff/rules/raise-without-from-inside-except/
+]
+select = ["B", "C", "E", "F", "W", "I", "TID"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+#=== End: Ruff
+
+#=== Begin: MyPy
+
+# global mypy config
+[tool.mypy]
+ignore_missing_imports = true # ignores missing types in third-party libraries
+strict = true
+plugins = "pydantic.mypy"
+exclude = ["tests/*"]
+
+# overrides for specific modules
+[[tool.mypy.overrides]]
+follow_imports = "skip" # skips type checking of the modules listed below
+module = [
+  "invokeai.app.api.routers.models",
+  "invokeai.app.invocations.compel",
+  "invokeai.app.invocations.denoise_latents",
+  "invokeai.app.services.invocation_stats.invocation_stats_default",
+  "invokeai.app.services.model_manager.model_manager_base",
+  "invokeai.app.services.model_manager.model_manager_default",
+  "invokeai.app.services.model_manager.store.model_records_sql",
+  "invokeai.app.util.controlnet_utils",
+  "invokeai.backend.image_util.txt2mask",
+  "invokeai.backend.image_util.safety_checker",
+  "invokeai.backend.image_util.patchmatch",
+  "invokeai.backend.image_util.invisible_watermark",
+  "invokeai.backend.install.model_install_backend",
+  "invokeai.backend.ip_adapter.ip_adapter",
+  "invokeai.backend.ip_adapter.resampler",
+  "invokeai.backend.ip_adapter.unet_patcher",
+  "invokeai.backend.model_management.convert_ckpt_to_diffusers",
+  "invokeai.backend.model_management.lora",
+  "invokeai.backend.model_management.model_cache",
+  "invokeai.backend.model_management.model_manager",
+  "invokeai.backend.model_management.model_merge",
+  "invokeai.backend.model_management.model_probe",
+  "invokeai.backend.model_management.model_search",
+  "invokeai.backend.model_management.models.*",                            # this is needed to ignore the module's `__init__.py`
+  "invokeai.backend.model_management.models.base",
+  "invokeai.backend.model_management.models.controlnet",
+  "invokeai.backend.model_management.models.ip_adapter",
+  "invokeai.backend.model_management.models.lora",
+  "invokeai.backend.model_management.models.sdxl",
+  "invokeai.backend.model_management.models.stable_diffusion",
+  "invokeai.backend.model_management.models.vae",
+  "invokeai.backend.model_management.seamless",
+  "invokeai.backend.model_management.util",
+  "invokeai.backend.stable_diffusion.diffusers_pipeline",
+  "invokeai.backend.stable_diffusion.diffusion.shared_invokeai_diffusion",
+  "invokeai.backend.util.hotfixes",
+  "invokeai.backend.util.mps_fixes",
+  "invokeai.backend.util.util",
+  "invokeai.frontend.install.model_install",
+]
+#=== End: MyPy
+
+[tool.pyright]
+# Start from strict mode
+typeCheckingMode = "strict"
+# This errors whenever an import is missing a type stub file - way too noisy
+reportMissingTypeStubs = "none"
+# These are the rest of the rules enabled by strict mode - enable them @ warning
+reportConstantRedefinition = "warning"
+reportDeprecated = "warning"
+reportDuplicateImport = "warning"
+reportIncompleteStub = "warning"
+reportInconsistentConstructor = "warning"
+reportInvalidStubStatement = "warning"
+reportMatchNotExhaustive = "warning"
+reportMissingParameterType = "warning"
+reportMissingTypeArgument = "warning"
+reportPrivateUsage = "warning"
+reportTypeCommentUsage = "warning"
+reportUnknownArgumentType = "warning"
+reportUnknownLambdaType = "warning"
+reportUnknownMemberType = "warning"
+reportUnknownParameterType = "warning"
+reportUnknownVariableType = "warning"
+reportUnnecessaryCast = "warning"
+reportUnnecessaryComparison = "warning"
+reportUnnecessaryContains = "warning"
+reportUnnecessaryIsInstance = "warning"
+reportUnusedClass = "warning"
+reportUnusedImport = "warning"
+reportUnusedFunction = "warning"
+reportUnusedVariable = "warning"
+reportUntypedBaseClass = "warning"
+reportUntypedClassDecorator = "warning"
+reportUntypedFunctionDecorator = "warning"
+reportUntypedNamedTuple = "warning"
