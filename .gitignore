@@ -10,3 +10,4 @@ invokeai.yaml
 configs/
 invokeai.example.yaml
 Invoke.Community.Edition.Setup.latest.exe
+style_presets/
