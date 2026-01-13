@@ -8,3 +8,4 @@ __pycache__/
 .env
 invokeai.yaml
 configs/
+invokeai.example.yaml
