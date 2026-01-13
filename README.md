@@ -1,3 +1,3 @@
 # Cat_InvokeAI
-![alt text](image.png)
+![alt text](Image/image.png)
 Custom InvokeAI distribution.
