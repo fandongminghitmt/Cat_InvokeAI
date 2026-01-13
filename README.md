@@ -1,5 +1,1 @@
-# Cat_InvokeAI
-![alt text](Image/image.png)
-
-
-Custom InvokeAI distribution.
+<h1 align="center">🐱- Cat_InvokeAI<br><sub><sup>基于Invoke二次开发的AIGC工具/AIGC tool based on Invoke secondary development</sup></sub></h1>
