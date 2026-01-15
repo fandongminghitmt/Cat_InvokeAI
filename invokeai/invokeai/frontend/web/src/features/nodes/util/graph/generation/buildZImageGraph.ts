@@ -5,6 +5,12 @@ import {
   selectParamsSlice,
   selectZImageQwen3EncoderModel,
   selectZImageQwen3SourceModel,
+<<<<<<< HEAD
+=======
+  selectZImageSeedVarianceEnabled,
+  selectZImageSeedVarianceRandomizePercent,
+  selectZImageSeedVarianceStrength,
+>>>>>>> upstream/main
   selectZImageVaeModel,
 } from 'features/controlLayers/store/paramsSlice';
 import { selectCanvasMetadata, selectCanvasSlice } from 'features/controlLayers/store/selectors';
@@ -55,6 +61,14 @@ export const buildZImageGraph = async (arg: GraphBuilderArg): Promise<GraphBuild
   // (1.0 means no CFG effect, matching FLUX convention)
   const { cfgScale: guidance_scale, steps, zImageScheduler } = params;
 
+<<<<<<< HEAD
+=======
+  // Seed Variance Enhancer settings
+  const seedVarianceEnabled = selectZImageSeedVarianceEnabled(state);
+  const seedVarianceStrength = selectZImageSeedVarianceStrength(state);
+  const seedVarianceRandomizePercent = selectZImageSeedVarianceRandomizePercent(state);
+
+>>>>>>> upstream/main
   const prompts = selectPresetModifiedPrompts(state);
 
   const g = new Graph(getPrefixedId('z_image_graph'));
@@ -127,8 +141,29 @@ export const buildZImageGraph = async (arg: GraphBuilderArg): Promise<GraphBuild
   g.addEdge(modelLoader, 'vae', denoise, 'vae');
 
   g.addEdge(positivePrompt, 'value', posCond, 'prompt');
+<<<<<<< HEAD
   // Connect positive conditioning through collector for regional support
   g.addEdge(posCond, 'conditioning', posCondCollect, 'item');
+=======
+
+  // Optionally add Seed Variance Enhancer between text encoder and denoise
+  if (seedVarianceEnabled && seedVarianceStrength > 0) {
+    const seedVarianceEnhancer = g.addNode({
+      type: 'z_image_seed_variance_enhancer',
+      id: getPrefixedId('seed_variance_enhancer'),
+      strength: seedVarianceStrength,
+      randomize_percent: seedVarianceRandomizePercent,
+    });
+    // Connect seed to variance enhancer
+    g.addEdge(seed, 'value', seedVarianceEnhancer, 'seed');
+    // Connect conditioning through the enhancer
+    g.addEdge(posCond, 'conditioning', seedVarianceEnhancer, 'conditioning');
+    g.addEdge(seedVarianceEnhancer, 'conditioning', posCondCollect, 'item');
+  } else {
+    // Connect positive conditioning directly through collector for regional support
+    g.addEdge(posCond, 'conditioning', posCondCollect, 'item');
+  }
+>>>>>>> upstream/main
   g.addEdge(posCondCollect, 'collection', denoise, 'positive_conditioning');
 
   // Connect negative conditioning if guidance_scale > 1
@@ -188,6 +223,13 @@ export const buildZImageGraph = async (arg: GraphBuilderArg): Promise<GraphBuild
     vae: zImageVaeModel ?? undefined,
     qwen3_encoder: zImageQwen3EncoderModel ?? undefined,
     qwen3_source: zImageQwen3SourceModel ?? undefined,
+<<<<<<< HEAD
+=======
+    // Seed Variance Enhancer settings
+    z_image_seed_variance_enabled: seedVarianceEnabled,
+    z_image_seed_variance_strength: seedVarianceStrength,
+    z_image_seed_variance_randomize_percent: seedVarianceRandomizePercent,
+>>>>>>> upstream/main
   });
   g.addEdgeToMetadata(seed, 'value', 'seed');
   g.addEdgeToMetadata(positivePrompt, 'value', 'positive_prompt');

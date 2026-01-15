@@ -75,6 +75,18 @@ const slice = createSlice({
     setZImageScheduler: (state, action: PayloadAction<'euler' | 'heun' | 'lcm'>) => {
       state.zImageScheduler = action.payload;
     },
+<<<<<<< HEAD
+=======
+    setZImageSeedVarianceEnabled: (state, action: PayloadAction<boolean>) => {
+      state.zImageSeedVarianceEnabled = action.payload;
+    },
+    setZImageSeedVarianceStrength: (state, action: PayloadAction<number>) => {
+      state.zImageSeedVarianceStrength = action.payload;
+    },
+    setZImageSeedVarianceRandomizePercent: (state, action: PayloadAction<number>) => {
+      state.zImageSeedVarianceRandomizePercent = action.payload;
+    },
+>>>>>>> upstream/main
     setUpscaleScheduler: (state, action: PayloadAction<ParameterScheduler>) => {
       state.upscaleScheduler = action.payload;
     },
@@ -457,6 +469,12 @@ export const {
   setScheduler,
   setFluxScheduler,
   setZImageScheduler,
+<<<<<<< HEAD
+=======
+  setZImageSeedVarianceEnabled,
+  setZImageSeedVarianceStrength,
+  setZImageSeedVarianceRandomizePercent,
+>>>>>>> upstream/main
   setUpscaleScheduler,
   setUpscaleCfgScale,
   setSeed,
@@ -598,6 +616,14 @@ export const selectModelSupportsOptimizedDenoising = createSelector(
 export const selectScheduler = createParamsSelector((params) => params.scheduler);
 export const selectFluxScheduler = createParamsSelector((params) => params.fluxScheduler);
 export const selectZImageScheduler = createParamsSelector((params) => params.zImageScheduler);
+<<<<<<< HEAD
+=======
+export const selectZImageSeedVarianceEnabled = createParamsSelector((params) => params.zImageSeedVarianceEnabled);
+export const selectZImageSeedVarianceStrength = createParamsSelector((params) => params.zImageSeedVarianceStrength);
+export const selectZImageSeedVarianceRandomizePercent = createParamsSelector(
+  (params) => params.zImageSeedVarianceRandomizePercent
+);
+>>>>>>> upstream/main
 export const selectSeamlessXAxis = createParamsSelector((params) => params.seamlessXAxis);
 export const selectSeamlessYAxis = createParamsSelector((params) => params.seamlessYAxis);
 export const selectSeed = createParamsSelector((params) => params.seed);

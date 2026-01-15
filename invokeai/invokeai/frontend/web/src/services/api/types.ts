@@ -73,6 +73,7 @@ const _zImageDTO = z.object({
 export type ImageDTO = z.infer<typeof _zImageDTO>;
 assert<Equals<ImageDTO, S['ImageDTO']>>();
 
+<<<<<<< HEAD
 // Videos
 const _zVideoDTO = z.object({
   video_name: z.string(),
@@ -116,6 +117,8 @@ const _zAudioDTO = z.object({
 });
 export type AudioDTO = z.infer<typeof _zAudioDTO>;
 
+=======
+>>>>>>> upstream/main
 export type BoardDTO = S['BoardDTO'];
 export type OffsetPaginatedResults_ImageDTO_ = S['OffsetPaginatedResults_ImageDTO_'];
 
@@ -462,6 +465,7 @@ export type UploadImageArg = {
 
 export type ImageUploadEntryResponse = S['ImageUploadEntry'];
 export type ImageUploadEntryRequest = paths['/api/v1/images/']['post']['requestBody']['content']['application/json'];
+<<<<<<< HEAD
 
 export type UploadVideoArg = {
   file: File;
@@ -484,3 +488,5 @@ export type UploadAudioArg = {
   silent?: boolean;
   isFirstUploadOfBatch?: boolean;
 };
+=======
+>>>>>>> upstream/main

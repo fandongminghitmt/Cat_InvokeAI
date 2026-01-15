@@ -237,6 +237,7 @@ class ImageField(BaseModel):
     image_name: str = Field(description="The name of the image")
 
 
+<<<<<<< HEAD
 class VideoField(BaseModel):
     """A video primitive field"""
 
@@ -250,6 +251,8 @@ class AudioField(BaseModel):
 
 
 
+=======
+>>>>>>> upstream/main
 class BoardField(BaseModel):
     """A board primitive field"""
 

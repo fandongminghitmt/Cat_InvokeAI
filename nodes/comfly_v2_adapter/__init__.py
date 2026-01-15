@@ -3,3 +3,4 @@ from .config_nodes import ComflyAPIConfigInvocation
 from .flux_nodes import ComflyFlux2MaxInvocation
 from .gemini_nodes import ComflyGeminiNanoBananaInvocation
 from .google_nodes import ComflyGoogleVeo3Invocation
+from .vnccs_nodes import *

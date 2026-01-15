@@ -54,6 +54,7 @@ export const buildOnInvocationComplete = (
       return;
     }
 
+<<<<<<< HEAD
     const currentSelectedBoardId = selectSelectedBoardId(getState());
     const imagesToAddToBoard: string[] = [];
 
@@ -82,6 +83,8 @@ export const buildOnInvocationComplete = (
       );
     }
 
+=======
+>>>>>>> upstream/main
     // For efficiency's sake, we want to minimize the number of dispatches and invalidations we do.
     // We'll keep track of each change we need to make and do them all at once.
     const boardTotalAdditions: Record<string, number> = {};

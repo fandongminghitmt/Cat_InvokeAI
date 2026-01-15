@@ -3,6 +3,10 @@ import { useStore } from '@nanostores/react';
 import { useFocusRegion, useIsRegionFocused } from 'common/hooks/focus';
 import { CanvasOperationIsolatedLayerPreviewSwitch } from 'features/controlLayers/components/CanvasOperationIsolatedLayerPreviewSwitch';
 import { TransformFitToBboxButtons } from 'features/controlLayers/components/Transform/TransformFitToBboxButtons';
+<<<<<<< HEAD
+=======
+import { TransformSmoothingControls } from 'features/controlLayers/components/Transform/TransformSmoothingControls';
+>>>>>>> upstream/main
 import { useCanvasManager } from 'features/controlLayers/contexts/CanvasManagerProviderGate';
 import type { CanvasEntityAdapter } from 'features/controlLayers/konva/CanvasEntity/types';
 import { useRegisteredHotkeys } from 'features/system/components/HotkeysModal/useHotkeyData';
@@ -59,6 +63,11 @@ const TransformContent = memo(({ adapter }: { adapter: CanvasEntityAdapter }) =>
         <CanvasOperationIsolatedLayerPreviewSwitch />
       </Flex>
 
+<<<<<<< HEAD
+=======
+      <TransformSmoothingControls />
+
+>>>>>>> upstream/main
       <TransformFitToBboxButtons adapter={adapter} />
 
       <ButtonGroup isAttached={false} size="sm" w="full" alignItems="center">

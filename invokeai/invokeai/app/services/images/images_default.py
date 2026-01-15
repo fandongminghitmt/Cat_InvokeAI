@@ -136,6 +136,7 @@ class ImageService(ImageServiceABC):
 
     def get_dto(self, image_name: str) -> ImageDTO:
         try:
+<<<<<<< HEAD
             # Try images first
             try:
                 image_record = self.__invoker.services.image_records.get(image_name)
@@ -216,6 +217,23 @@ class ImageService(ImageServiceABC):
             raise
         except Exception as e:
             self.__invoker.services.logger.error("Problem getting image/media DTO")
+=======
+            image_record = self.__invoker.services.image_records.get(image_name)
+
+            image_dto = image_record_to_dto(
+                image_record=image_record,
+                image_url=self.__invoker.services.urls.get_image_url(image_name),
+                thumbnail_url=self.__invoker.services.urls.get_image_url(image_name, True),
+                board_id=self.__invoker.services.board_image_records.get_board_for_image(image_name),
+            )
+
+            return image_dto
+        except ImageRecordNotFoundException:
+            self.__invoker.services.logger.error("Image record not found")
+            raise
+        except Exception as e:
+            self.__invoker.services.logger.error("Problem getting image DTO")
+>>>>>>> upstream/main
             raise e
 
     def get_metadata(self, image_name: str) -> Optional[MetadataField]:
@@ -294,6 +312,7 @@ class ImageService(ImageServiceABC):
                 search_term,
             )
 
+<<<<<<< HEAD
             image_dtos = []
             for r in results.items:
                 # Hack: Fix dimensions for Audio/Video if they are 0, to pass frontend validation
@@ -301,11 +320,21 @@ class ImageService(ImageServiceABC):
                 if r.height == 0: r.height = 1
                 
                 image_dtos.append(image_record_to_dto(
+=======
+            image_dtos = [
+                image_record_to_dto(
+>>>>>>> upstream/main
                     image_record=r,
                     image_url=self.__invoker.services.urls.get_image_url(r.image_name),
                     thumbnail_url=self.__invoker.services.urls.get_image_url(r.image_name, True),
                     board_id=self.__invoker.services.board_image_records.get_board_for_image(r.image_name),
+<<<<<<< HEAD
                 ))
+=======
+                )
+                for r in results.items
+            ]
+>>>>>>> upstream/main
 
             return OffsetPaginatedResults[ImageDTO](
                 items=image_dtos,
@@ -319,11 +348,15 @@ class ImageService(ImageServiceABC):
 
     def delete(self, image_name: str):
         try:
+<<<<<<< HEAD
             try:
                 self.__invoker.services.image_files.delete(image_name)
             except Exception:
                 self.__invoker.services.logger.warning(f"Failed to delete image file for {image_name}, but proceeding to delete record.")
             
+=======
+            self.__invoker.services.image_files.delete(image_name)
+>>>>>>> upstream/main
             self.__invoker.services.image_records.delete(image_name)
             self._on_deleted(image_name)
         except ImageRecordDeleteException:

@@ -24,8 +24,11 @@ if TYPE_CHECKING:
     from invokeai.app.services.image_files.image_files_base import ImageFileStorageBase
     from invokeai.app.services.image_records.image_records_base import ImageRecordStorageBase
     from invokeai.app.services.images.images_base import ImageServiceABC
+<<<<<<< HEAD
     from invokeai.app.services.video.video_base import VideoServiceABC
     from invokeai.app.services.audio.audio_base import AudioServiceABC
+=======
+>>>>>>> upstream/main
     from invokeai.app.services.invocation_cache.invocation_cache_base import InvocationCacheBase
     from invokeai.app.services.invocation_stats.invocation_stats_base import InvocationStatsServiceBase
     from invokeai.app.services.model_images.model_images_base import ModelImageFileStorageBase
@@ -56,8 +59,11 @@ class InvocationServices:
         configuration: "InvokeAIAppConfig",
         events: "EventServiceBase",
         images: "ImageServiceABC",
+<<<<<<< HEAD
         videos: "VideoServiceABC",
         audios: "AudioServiceABC",
+=======
+>>>>>>> upstream/main
         image_files: "ImageFileStorageBase",
         image_records: "ImageRecordStorageBase",
         logger: "Logger",
@@ -88,8 +94,11 @@ class InvocationServices:
         self.configuration = configuration
         self.events = events
         self.images = images
+<<<<<<< HEAD
         self.videos = videos
         self.audios = audios
+=======
+>>>>>>> upstream/main
         self.image_files = image_files
         self.image_records = image_records
         self.logger = logger

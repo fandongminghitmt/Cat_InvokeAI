@@ -17,8 +17,11 @@ from invokeai.app.services.events.events_fastapievents import FastAPIEventServic
 from invokeai.app.services.image_files.image_files_disk import DiskImageFileStorage
 from invokeai.app.services.image_records.image_records_sqlite import SqliteImageRecordStorage
 from invokeai.app.services.images.images_default import ImageService
+<<<<<<< HEAD
 from invokeai.app.services.video.video_default import VideoService
 from invokeai.app.services.audio.audio_default import AudioService
+=======
+>>>>>>> upstream/main
 from invokeai.app.services.invocation_cache.invocation_cache_memory import MemoryInvocationCache
 from invokeai.app.services.invocation_services import InvocationServices
 from invokeai.app.services.invocation_stats.invocation_stats_default import InvocationStatsService
@@ -114,8 +117,11 @@ class ApiDependencies:
         bulk_download = BulkDownloadService()
         image_records = SqliteImageRecordStorage(db=db)
         images = ImageService()
+<<<<<<< HEAD
         videos = VideoService()
         audios = AudioService()
+=======
+>>>>>>> upstream/main
         invocation_cache = MemoryInvocationCache(max_cache_size=config.node_cache_size)
         tensors = ObjectSerializerForwardCache(
             ObjectSerializerDisk[torch.Tensor](
@@ -171,8 +177,11 @@ class ApiDependencies:
             image_files=image_files,
             image_records=image_records,
             images=images,
+<<<<<<< HEAD
             videos=videos,
             audios=audios,
+=======
+>>>>>>> upstream/main
             invocation_cache=invocation_cache,
             logger=logger,
             model_images=model_images_service,

@@ -15,8 +15,11 @@ const config: KnipConfig = {
     // Will be using this
     'src/common/hooks/useAsyncState.ts',
     'src/app/store/use-debounced-app-selector.ts',
+<<<<<<< HEAD
     'src/services/api/endpoints/media.ts',
     'src/services/api/types.ts',
+=======
+>>>>>>> upstream/main
   ],
   ignoreBinaries: ['only-allow'],
   ignoreDependencies: ['magic-string'],

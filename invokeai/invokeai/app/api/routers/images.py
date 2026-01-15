@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 from invokeai.app.services.images.images_common import VideoDTO
 from invokeai.app.services.image_records.image_records_common import ResourceOrigin
+=======
+>>>>>>> upstream/main
 import io
 import json
 import traceback
@@ -52,6 +55,7 @@ class ResizeToDimensions(BaseModel):
         return self
 
 
+<<<<<<< HEAD
 
 def convert_video_to_image_dto(video_dto: VideoDTO) -> ImageDTO:
     base_url = "api/v1/media/video"
@@ -74,6 +78,8 @@ def convert_video_to_image_dto(video_dto: VideoDTO) -> ImageDTO:
         board_id=None
     )
 
+=======
+>>>>>>> upstream/main
 @images_router.post(
     "/upload",
     operation_id="upload_image",
@@ -105,6 +111,7 @@ async def upload_image(
     ),
 ) -> ImageDTO:
     """Uploads an image"""
+<<<<<<< HEAD
     
     # HACK: Intercept video uploads
     if file.content_type and file.content_type.startswith("video"):
@@ -124,6 +131,8 @@ async def upload_image(
             ApiDependencies.invoker.services.logger.error(f"Video upload failed: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Video upload failed: {str(e)}")
 
+=======
+>>>>>>> upstream/main
     if not file.content_type or not file.content_type.startswith("image"):
         raise HTTPException(status_code=415, detail="Not an image")
 
@@ -352,11 +361,15 @@ async def get_image_full(
         path = ApiDependencies.invoker.services.images.get_path(image_name)
         with open(path, "rb") as f:
             content = f.read()
+<<<<<<< HEAD
         import mimetypes
         mime_type, _ = mimetypes.guess_type(path)
         if not mime_type:
             mime_type = "image/png"
         response = Response(content, media_type=mime_type)
+=======
+        response = Response(content, media_type="image/png")
+>>>>>>> upstream/main
         response.headers["Cache-Control"] = f"max-age={IMAGE_MAX_AGE}"
         response.headers["Content-Disposition"] = f'inline; filename="{image_name}"'
         return response

@@ -21,7 +21,10 @@ async def add_image_to_board(
     image_name: str = Body(description="The name of the image to add"),
 ) -> AddImagesToBoardResult:
     """Creates a board_image"""
+<<<<<<< HEAD
     print(f"DEBUG: add_image_to_board single called board_id={board_id} image_name={image_name}")
+=======
+>>>>>>> upstream/main
     try:
         added_images: set[str] = set()
         affected_boards: set[str] = set()
@@ -83,7 +86,10 @@ async def add_images_to_board(
     image_names: list[str] = Body(description="The names of the images to add", embed=True),
 ) -> AddImagesToBoardResult:
     """Adds a list of images to a board"""
+<<<<<<< HEAD
     print(f"DEBUG: add_images_to_board batch called board_id={board_id} images={image_names}")
+=======
+>>>>>>> upstream/main
     try:
         added_images: set[str] = set()
         affected_boards: set[str] = set()

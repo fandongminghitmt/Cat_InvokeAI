@@ -36,6 +36,10 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
                     """,
                     (image_name,),
                 )
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
                 result = cast(Optional[sqlite3.Row], cursor.fetchone())
             except sqlite3.Error as e:
                 raise ImageRecordNotFoundException from e
@@ -55,12 +59,17 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
                     """,
                     (image_name,),
                 )
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
                 result = cast(Optional[sqlite3.Row], cursor.fetchone())
 
             except sqlite3.Error as e:
                 raise ImageRecordNotFoundException from e
 
             if not result:
+<<<<<<< HEAD
                 # Try video metadata if not found in images (Hack for Unified Media)
                 try:
                     cursor.execute("SELECT metadata FROM videos WHERE video_name = ?", (image_name,))
@@ -70,6 +79,9 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
                 
                 if not result:
                     raise ImageRecordNotFoundException
+=======
+                raise ImageRecordNotFoundException
+>>>>>>> upstream/main
 
             as_dict = dict(result)
             metadata_raw = cast(Optional[str], as_dict.get("metadata", None))
@@ -141,8 +153,11 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
         board_id: Optional[str] = None,
         search_term: Optional[str] = None,
     ) -> OffsetPaginatedResults[ImageRecord]:
+<<<<<<< HEAD
         # NOTE: get_many is used for internal iteration, not gallery display usually.
         # Keeping it strictly for images to avoid breaking things that expect ImageRecord structure.
+=======
+>>>>>>> upstream/main
         with self._db.transaction() as cursor:
             # Manually build two queries - one for the count, one for the records
             count_query = """--sql
@@ -186,6 +201,10 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
                 query_conditions += """--sql
                 AND images.is_intermediate = ?
                 """
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
                 query_params.append(is_intermediate)
 
             # board_id of "none" is reserved for images without a board
@@ -243,6 +262,7 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
     def delete(self, image_name: str) -> None:
         with self._db.transaction() as cursor:
             try:
+<<<<<<< HEAD
                 cursor.execute("DELETE FROM images WHERE image_name = ?", (image_name,))
                 # Patch: Also try to delete from videos and audios to fix stuck media
                 try:
@@ -250,6 +270,15 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
                     cursor.execute("DELETE FROM audios WHERE audio_name = ?", (image_name,))
                 except:
                     pass
+=======
+                cursor.execute(
+                    """--sql
+                    DELETE FROM images
+                    WHERE image_name = ?;
+                    """,
+                    (image_name,),
+                )
+>>>>>>> upstream/main
             except sqlite3.Error as e:
                 raise ImageRecordDeleteException from e
 
@@ -395,22 +424,39 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
         search_term: Optional[str] = None,
     ) -> ImageNamesResult:
         with self._db.transaction() as cursor:
+<<<<<<< HEAD
             # --- IMAGES QUERY ---
+=======
+            # Build query conditions (reused for both starred count and image names queries)
+>>>>>>> upstream/main
             query_conditions = ""
             query_params: list[Union[int, str, bool]] = []
 
             if image_origin is not None:
+<<<<<<< HEAD
                 query_conditions += " AND images.image_origin = ? "
+=======
+                query_conditions += """--sql
+                AND images.image_origin = ?
+                """
+>>>>>>> upstream/main
                 query_params.append(image_origin.value)
 
             if categories is not None:
                 category_strings = [c.value for c in set(categories)]
                 placeholders = ",".join("?" * len(category_strings))
+<<<<<<< HEAD
                 query_conditions += f" AND images.image_category IN ( {placeholders} ) "
+=======
+                query_conditions += f"""--sql
+                AND images.image_category IN ( {placeholders} )
+                """
+>>>>>>> upstream/main
                 for c in category_strings:
                     query_params.append(c)
 
             if is_intermediate is not None:
+<<<<<<< HEAD
                 query_conditions += " AND images.is_intermediate = ? "
                 query_params.append(is_intermediate)
 
@@ -502,3 +548,65 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
             starred_count = 0 # Todo: calculate properly
 
         return ImageNamesResult(image_names=image_names, starred_count=starred_count, total_count=total_count)
+=======
+                query_conditions += """--sql
+                AND images.is_intermediate = ?
+                """
+                query_params.append(is_intermediate)
+
+            if board_id == "none":
+                query_conditions += """--sql
+                AND board_images.board_id IS NULL
+                """
+            elif board_id is not None:
+                query_conditions += """--sql
+                AND board_images.board_id = ?
+                """
+                query_params.append(board_id)
+
+            if search_term:
+                query_conditions += """--sql
+                AND (
+                    images.metadata LIKE ?
+                    OR images.created_at LIKE ?
+                )
+                """
+                query_params.append(f"%{search_term.lower()}%")
+                query_params.append(f"%{search_term.lower()}%")
+
+            # Get starred count if starred_first is enabled
+            starred_count = 0
+            if starred_first:
+                starred_count_query = f"""--sql
+                SELECT COUNT(*)
+                FROM images
+                LEFT JOIN board_images ON board_images.image_name = images.image_name
+                WHERE images.starred = TRUE AND (1=1{query_conditions})
+                """
+                cursor.execute(starred_count_query, query_params)
+                starred_count = cast(int, cursor.fetchone()[0])
+
+            # Get all image names with proper ordering
+            if starred_first:
+                names_query = f"""--sql
+                SELECT images.image_name
+                FROM images
+                LEFT JOIN board_images ON board_images.image_name = images.image_name
+                WHERE 1=1{query_conditions}
+                ORDER BY images.starred DESC, images.created_at {order_dir.value}
+                """
+            else:
+                names_query = f"""--sql
+                SELECT images.image_name
+                FROM images
+                LEFT JOIN board_images ON board_images.image_name = images.image_name
+                WHERE 1=1{query_conditions}
+                ORDER BY images.created_at {order_dir.value}
+                """
+
+            cursor.execute(names_query, query_params)
+            result = cast(list[sqlite3.Row], cursor.fetchall())
+        image_names = [row[0] for row in result]
+
+        return ImageNamesResult(image_names=image_names, starred_count=starred_count, total_count=len(image_names))
+>>>>>>> upstream/main

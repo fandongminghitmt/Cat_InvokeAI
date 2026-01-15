@@ -13,9 +13,13 @@ from invokeai.app.services.board_records.board_records_common import BoardRecord
 from invokeai.app.services.boards.boards_common import BoardDTO
 from invokeai.app.services.config.config_default import InvokeAIAppConfig
 from invokeai.app.services.image_records.image_records_common import ImageCategory, ResourceOrigin
+<<<<<<< HEAD
 from invokeai.app.services.images.images_common import ImageDTO, VideoDTO, AudioDTO
 from invokeai.app.services.video.video_base import VideoServiceABC
 from invokeai.app.services.audio.audio_base import AudioServiceABC
+=======
+from invokeai.app.services.images.images_common import ImageDTO
+>>>>>>> upstream/main
 from invokeai.app.services.invocation_services import InvocationServices
 from invokeai.app.services.model_records.model_records_base import UnknownModelException
 from invokeai.app.services.session_processor.session_processor_common import ProgressImage
@@ -290,6 +294,7 @@ class ImagesInterface(InvocationContextInterface):
         """
         return Path(self._services.images.get_path(image_name, thumbnail))
 
+<<<<<<< HEAD
 class VideosInterface(InvocationContextInterface):
     def __init__(self, services: InvocationServices, data: InvocationContextData) -> None:
         super().__init__(services, data)
@@ -322,6 +327,8 @@ class AudiosInterface(InvocationContextInterface):
         return self._services.audios.get_dto(audio_name)
 
 
+=======
+>>>>>>> upstream/main
 
 class TensorsInterface(InvocationContextInterface):
     def save(self, tensor: Tensor) -> str:
@@ -739,8 +746,11 @@ class InvocationContext:
         config (ConfigInterface): The app config.
         util (UtilInterface): Utility methods, including a method to check if an invocation was canceled and step callbacks.
         boards (BoardsInterface): Methods to interact with boards.
+<<<<<<< HEAD
         videos (VideosInterface): Methods to interact with videos.
         audios (AudiosInterface): Methods to interact with audios.
+=======
+>>>>>>> upstream/main
     """
 
     def __init__(
@@ -753,8 +763,11 @@ class InvocationContext:
         config: ConfigInterface,
         util: UtilInterface,
         boards: BoardsInterface,
+<<<<<<< HEAD
         videos: VideosInterface,
         audios: AudiosInterface,
+=======
+>>>>>>> upstream/main
         data: InvocationContextData,
         services: InvocationServices,
     ) -> None:
@@ -773,8 +786,11 @@ class InvocationContext:
         self.util = util
         """Utility methods, including a method to check if an invocation was canceled and step callbacks."""
         self.boards = boards
+<<<<<<< HEAD
         self.videos = videos
         self.audios = audios
+=======
+>>>>>>> upstream/main
         """Methods to interact with boards."""
         self._data = data
         """An internal API providing access to data about the current queue item and invocation. You probably shouldn't use this. It may change without warning."""
@@ -805,8 +821,11 @@ def build_invocation_context(
     models = ModelsInterface(services=services, data=data, util=util)
     images = ImagesInterface(services=services, data=data, util=util)
     boards = BoardsInterface(services=services, data=data)
+<<<<<<< HEAD
     videos = VideosInterface(services=services, data=data)
     audios = AudiosInterface(services=services, data=data)
+=======
+>>>>>>> upstream/main
 
     ctx = InvocationContext(
         images=images,
@@ -819,8 +838,11 @@ def build_invocation_context(
         conditioning=conditioning,
         services=services,
         boards=boards,
+<<<<<<< HEAD
         videos=videos,
         audios=audios,
+=======
+>>>>>>> upstream/main
     )
 
     return ctx

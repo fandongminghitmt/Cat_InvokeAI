@@ -4,11 +4,18 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+<<<<<<< HEAD
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+=======
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.responses import HTMLResponse, RedirectResponse
+>>>>>>> upstream/main
 from fastapi_events.handlers.local import local_handler
 from fastapi_events.middleware import EventHandlerASGIMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -19,12 +26,18 @@ from invokeai.app.api.no_cache_staticfiles import NoCacheStaticFiles
 from invokeai.app.api.routers import (
     app_info,
     board_images,
+<<<<<<< HEAD
     media,
+=======
+>>>>>>> upstream/main
     boards,
     client_state,
     download_queue,
     images,
+<<<<<<< HEAD
     media,
+=======
+>>>>>>> upstream/main
     model_manager,
     model_relationships,
     session_queue,
@@ -79,6 +92,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+<<<<<<< HEAD
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.error(f"Request validation error: {exc}")
@@ -91,6 +105,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={"detail": exc.errors()},
     )
+=======
+>>>>>>> upstream/main
 
 class RedirectRootWithQueryStringMiddleware(BaseHTTPMiddleware):
     """When a request is made to the root path with a query string, redirect to the root path without the query string.
@@ -140,7 +156,10 @@ app.include_router(utilities.utilities_router, prefix="/api")
 app.include_router(model_manager.model_manager_router, prefix="/api")
 app.include_router(download_queue.download_queue_router, prefix="/api")
 app.include_router(images.images_router, prefix="/api")
+<<<<<<< HEAD
 app.include_router(media.media_router, prefix="/api")
+=======
+>>>>>>> upstream/main
 app.include_router(boards.boards_router, prefix="/api")
 app.include_router(board_images.board_images_router, prefix="/api")
 app.include_router(model_relationships.model_relationships_router, prefix="/api")
@@ -185,4 +204,8 @@ except RuntimeError:
     logger.warning(f"No UI found at {web_root_path}/dist, skipping UI mount")
 app.mount(
     "/static", NoCacheStaticFiles(directory=Path(web_root_path, "static/")), name="static"
+<<<<<<< HEAD
 )  # docs favicon is in here
+=======
+)  # docs favicon is in here
+>>>>>>> upstream/main

@@ -31,6 +31,7 @@ type SingleSelectionMenuItemsProps = {
 const SingleSelectionMenuItems = ({ imageDTO }: SingleSelectionMenuItemsProps) => {
   const tab = useAppSelector(selectActiveTab);
 
+<<<<<<< HEAD
   const isVideoOrAudio =
     imageDTO.image_name.toLowerCase().endsWith('.mp4') || imageDTO.image_name.toLowerCase().endsWith('.mp3');
 
@@ -45,6 +46,8 @@ const SingleSelectionMenuItems = ({ imageDTO }: SingleSelectionMenuItemsProps) =
     );
   }
 
+=======
+>>>>>>> upstream/main
   return (
     <ImageDTOContextProvider value={imageDTO}>
       <IconMenuItemGroup>

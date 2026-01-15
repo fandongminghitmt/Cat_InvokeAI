@@ -229,6 +229,7 @@ class ImageNamesResult(BaseModel):
     image_names: list[str] = Field(description="Ordered list of image names")
     starred_count: int = Field(description="Number of starred images (when starred_first=True)")
     total_count: int = Field(description="Total number of images matching the query")
+<<<<<<< HEAD
 
 
 class VideoRecord(BaseModelExcludeNull):
@@ -291,3 +292,5 @@ class VideoRecordChanges(ImageRecordChanges):
 class AudioRecordChanges(ImageRecordChanges):
     """A set of changes to apply to an audio record."""
     pass
+=======
+>>>>>>> upstream/main

@@ -21,7 +21,11 @@
   "scripts": {
     "dev": "vite dev",
     "dev:host": "vite dev --host",
+<<<<<<< HEAD
     "build": "npm run lint && vite build",
+=======
+    "build": "pnpm run lint && vite build",
+>>>>>>> upstream/main
     "typegen": "node scripts/typegen.js",
     "preview": "vite preview",
     "lint:knip": "knip --tags=-knipignore",
@@ -29,8 +33,14 @@
     "lint:eslint": "eslint --max-warnings=0 .",
     "lint:prettier": "prettier --check .",
     "lint:tsc": "tsc --noEmit",
+<<<<<<< HEAD
     "lint": "concurrently -g -c red,green,yellow,blue,magenta npm:lint:*",
     "fix": "eslint --fix . && prettier --log-level warn --write .",
+=======
+    "lint": "concurrently -g -c red,green,yellow,blue,magenta pnpm:lint:*",
+    "fix": "eslint --fix . && prettier --log-level warn --write .",
+    "preinstall": "npx only-allow pnpm",
+>>>>>>> upstream/main
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest",

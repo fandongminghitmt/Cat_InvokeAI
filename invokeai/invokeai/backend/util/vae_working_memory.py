@@ -47,8 +47,11 @@ def estimate_vae_working_memory_sd15_sdxl(
         # If we are running in FP32, then we should account for the likely increase in model size (~250MB).
         working_memory += 250 * 2**20
 
+<<<<<<< HEAD
     print(f"estimate_vae_working_memory_sd15_sdxl: {int(working_memory)}")
 
+=======
+>>>>>>> upstream/main
     return int(working_memory)
 
 
