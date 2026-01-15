@@ -18,12 +18,65 @@ from invokeai.app.api.no_cache_staticfiles import NoCacheStaticFiles
 from invokeai.app.api.routers import (
     app_info,
     board_images,
-
     boards,
     client_state,
     download_queue,
     images,
+    model_manager,
+    model_relationships,
+    session_queue,
+    style_presets,
+    utilities,
+    workflows,
     media,
+)
+from invokeai.app.api.sockets import SocketIO
+from invokeai.app.services.config.config_default import get_config
+from invokeai.app.util.custom_openapi import get_openapi_func
+from invokeai.backend.util.logging import InvokeAILogger
+
+app_config = get_config()
+logger = InvokeAILogger.get_logger(config=app_config)
+
+loop = asyncio.new_event_loop()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Add startup event to load dependencies
+    ApiDependencies.initialize(config=app_config, event_handler_id=event_handler_id, loop=loop, logger=logger)
+
+    # Log the server address when it starts - in case the network log level is not high enough to see the startup log
+    proto = "https" if app_config.ssl_certfile else "http"
+    msg = f"Invoke running on {proto}://{app_config.host}:{app_config.port} (Press CTRL+C to quit)"
+
+    # Logging this way ignores the logger's log level and _always_ logs the message
+    record = logger.makeRecord(
+        name=logger.name,
+        level=logging.INFO,
+        fn="",
+        lno=0,
+        msg=msg,
+        args=(),
+        exc_info=None,
+    )
+    logger.handle(record)
+
+    yield
+    # Shut down threads
+    ApiDependencies.shutdown()
+
+
+# Create the app
+# TODO: create this all in a method so configuration/etc. can be passed in?
+app = FastAPI(
+    title="Invoke - Community Edition",
+    docs_url=None,
+    redoc_url=None,
+    separate_input_output_schemas=False,
+    lifespan=lifespan,
+)
+
 
 class RedirectRootWithQueryStringMiddleware(BaseHTTPMiddleware):
     """When a request is made to the root path with a query string, redirect to the root path without the query string.
@@ -73,7 +126,16 @@ app.include_router(utilities.utilities_router, prefix="/api")
 app.include_router(model_manager.model_manager_router, prefix="/api")
 app.include_router(download_queue.download_queue_router, prefix="/api")
 app.include_router(images.images_router, prefix="/api")
+app.include_router(boards.boards_router, prefix="/api")
+app.include_router(board_images.board_images_router, prefix="/api")
+app.include_router(model_relationships.model_relationships_router, prefix="/api")
+app.include_router(app_info.app_router, prefix="/api")
+app.include_router(session_queue.session_queue_router, prefix="/api")
+app.include_router(workflows.workflows_router, prefix="/api")
+app.include_router(style_presets.style_presets_router, prefix="/api")
+app.include_router(client_state.client_state_router, prefix="/api")
 app.include_router(media.media_router, prefix="/api")
+
 app.openapi = get_openapi_func(app)
 
 

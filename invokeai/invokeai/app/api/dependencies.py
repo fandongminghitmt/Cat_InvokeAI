@@ -17,7 +17,8 @@ from invokeai.app.services.events.events_fastapievents import FastAPIEventServic
 from invokeai.app.services.image_files.image_files_disk import DiskImageFileStorage
 from invokeai.app.services.image_records.image_records_sqlite import SqliteImageRecordStorage
 from invokeai.app.services.images.images_default import ImageService
-
+from invokeai.app.services.video.video_default import VideoService
+from invokeai.app.services.audio.audio_default import AudioService
 from invokeai.app.services.invocation_cache.invocation_cache_memory import MemoryInvocationCache
 from invokeai.app.services.invocation_services import InvocationServices
 from invokeai.app.services.invocation_stats.invocation_stats_default import InvocationStatsService
@@ -115,6 +116,63 @@ class ApiDependencies:
         images = ImageService()
         videos = VideoService()
         audios = AudioService()
+        invocation_cache = MemoryInvocationCache(max_cache_size=config.node_cache_size)
+        tensors = ObjectSerializerForwardCache(
+            ObjectSerializerDisk[torch.Tensor](
+                output_folder / "tensors",
+                safe_globals=[torch.Tensor],
+                ephemeral=True,
+            ),
+        )
+        conditioning = ObjectSerializerForwardCache(
+            ObjectSerializerDisk[ConditioningFieldData](
+                output_folder / "conditioning",
+                safe_globals=[
+                    ConditioningFieldData,
+                    BasicConditioningInfo,
+                    SDXLConditioningInfo,
+                    FLUXConditioningInfo,
+                    SD3ConditioningInfo,
+                    CogView4ConditioningInfo,
+                    ZImageConditioningInfo,
+                ],
+                ephemeral=True,
+            ),
+        )
+        download_queue_service = DownloadQueueService(app_config=configuration, event_bus=events)
+        model_images_service = ModelImageFileStorageDisk(model_images_folder / "model_images")
+        model_manager = ModelManagerService.build_model_manager(
+            app_config=configuration,
+            model_record_service=ModelRecordServiceSQL(db=db, logger=logger),
+            download_queue=download_queue_service,
+            events=events,
+        )
+        model_relationships = ModelRelationshipsService()
+        model_relationship_records = SqliteModelRelationshipRecordStorage(db=db)
+        names = SimpleNameService()
+        performance_statistics = InvocationStatsService()
+        session_processor = DefaultSessionProcessor(session_runner=DefaultSessionRunner())
+        session_queue = SqliteSessionQueue(db=db)
+        urls = LocalUrlService()
+        workflow_records = SqliteWorkflowRecordsStorage(db=db)
+        style_preset_records = SqliteStylePresetRecordsStorage(db=db)
+        style_preset_image_files = StylePresetImageFileStorageDisk(style_presets_folder / "images")
+        workflow_thumbnails = WorkflowThumbnailFileStorageDisk(workflow_thumbnails_folder)
+        client_state_persistence = ClientStatePersistenceSqlite(db=db)
+
+        services = InvocationServices(
+            board_image_records=board_image_records,
+            board_images=board_images,
+            board_records=board_records,
+            boards=boards,
+            bulk_download=bulk_download,
+            configuration=configuration,
+            events=events,
+            image_files=image_files,
+            image_records=image_records,
+            images=images,
+            videos=videos,
+            audios=audios,
             invocation_cache=invocation_cache,
             logger=logger,
             model_images=model_images_service,

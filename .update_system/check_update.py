@@ -7,6 +7,7 @@ import time
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "invokeai"))
 UPSTREAM_URL = "https://github.com/invoke-ai/InvokeAI.git"
+REPAIR_SCRIPT = os.path.join(SCRIPT_DIR, "repair_merge.py")
 
 def run_git(args, cwd=REPO_DIR):
     try:
@@ -78,6 +79,9 @@ def main():
     
     if not changes:
         print(f"当前版本: {local_version} (已是最新) (Current version: {local_version} - Already up to date)")
+        # Still run repair to ensure consistency even if no update
+        print("正在运行一致性修复检查... (Running consistency repair check...)")
+        subprocess.run([sys.executable, REPAIR_SCRIPT])
         return
 
     print("\n" + "="*50)
@@ -118,6 +122,14 @@ def main():
                 print("Git 已尝试自动合并。请检查代码中的冲突标记 (<<<<<<<)。 (Git attempted automatic merge. Please check code for conflict markers.)")
                 print("或者，您可以手动解决冲突。 (Or you can resolve conflicts manually.)")
                 print(f"Git 输出 (Git Output): {result.stdout}")
+            
+            # Run repair script after merge attempt (success or fail)
+            print("\n正在运行自动修复脚本以恢复核心功能... (Running auto-repair script to restore core functions...)")
+            if os.path.exists(REPAIR_SCRIPT):
+                subprocess.run([sys.executable, REPAIR_SCRIPT])
+            else:
+                print(f"Warning: Repair script not found at {REPAIR_SCRIPT}")
+
         except Exception as e:
             print(f"合并出错: {e} (Merge error: {e})")
             

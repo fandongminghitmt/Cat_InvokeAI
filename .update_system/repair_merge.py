@@ -1,4 +1,22 @@
-from copy import deepcopy
+import os
+import sys
+
+def write_file(path, content):
+    print(f"Writing {path}...")
+    try:
+        # Ensure dir exists
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        print("Success.")
+    except Exception as e:
+        print(f"Error writing {path}: {e}")
+        sys.exit(1)
+
+def repair_invocation_context():
+    # Based on official SHA 97291230e045f69a64ce414128ea1d9ebf578ea3
+    # Added: Video/Audio imports, Interfaces, and Context fields
+    content = r'''from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Optional, Union
@@ -676,3 +694,340 @@ def build_invocation_context(
     )
 
     return ctx
+'''
+    write_file("d:\\Cat_InvokeAI\\invokeai\\invokeai\\app\\services\\shared\\invocation_context.py", content)
+
+def repair_invocation_services():
+    # Based on official SHA 52fb064596da015cf048ec02a63d01be3acd9c37
+    # Added: Video/Audio services fields
+    content = r'''# Copyright (c) 2022 Kyle Schouviller (https://github.com/kyle0654) and the InvokeAI Team
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from invokeai.app.services.object_serializer.object_serializer_base import ObjectSerializerBase
+from invokeai.app.services.style_preset_images.style_preset_images_base import StylePresetImageFileStorageBase
+from invokeai.app.services.style_preset_records.style_preset_records_base import StylePresetRecordsStorageBase
+
+if TYPE_CHECKING:
+    from logging import Logger
+
+    import torch
+
+    from invokeai.app.services.board_image_records.board_image_records_base import BoardImageRecordStorageBase
+    from invokeai.app.services.board_images.board_images_base import BoardImagesServiceABC
+    from invokeai.app.services.board_records.board_records_base import BoardRecordStorageBase
+    from invokeai.app.services.boards.boards_base import BoardServiceABC
+    from invokeai.app.services.bulk_download.bulk_download_base import BulkDownloadBase
+    from invokeai.app.services.client_state_persistence.client_state_persistence_base import ClientStatePersistenceABC
+    from invokeai.app.services.config import InvokeAIAppConfig
+    from invokeai.app.services.download import DownloadQueueServiceBase
+    from invokeai.app.services.events.events_base import EventServiceBase
+    from invokeai.app.services.image_files.image_files_base import ImageFileStorageBase
+    from invokeai.app.services.image_records.image_records_base import ImageRecordStorageBase
+    from invokeai.app.services.images.images_base import ImageServiceABC
+    from invokeai.app.services.video.video_base import VideoServiceABC
+    from invokeai.app.services.audio.audio_base import AudioServiceABC
+    from invokeai.app.services.invocation_cache.invocation_cache_base import InvocationCacheBase
+    from invokeai.app.services.invocation_stats.invocation_stats_base import InvocationStatsServiceBase
+    from invokeai.app.services.model_images.model_images_base import ModelImageFileStorageBase
+    from invokeai.app.services.model_manager.model_manager_base import ModelManagerServiceBase
+    from invokeai.app.services.model_relationship_records.model_relationship_records_base import (
+        ModelRelationshipRecordStorageBase,
+    )
+    from invokeai.app.services.model_relationships.model_relationships_base import ModelRelationshipsServiceABC
+    from invokeai.app.services.names.names_base import NameServiceBase
+    from invokeai.app.services.session_processor.session_processor_base import SessionProcessorBase
+    from invokeai.app.services.session_queue.session_queue_base import SessionQueueBase
+    from invokeai.app.services.urls.urls_base import UrlServiceBase
+    from invokeai.app.services.workflow_records.workflow_records_base import WorkflowRecordsStorageBase
+    from invokeai.app.services.workflow_thumbnails.workflow_thumbnails_base import WorkflowThumbnailServiceBase
+    from invokeai.backend.stable_diffusion.diffusion.conditioning_data import ConditioningFieldData
+
+
+class InvocationServices:
+    """Services that can be used by invocations"""
+
+    def __init__(
+        self,
+        board_images: "BoardImagesServiceABC",
+        board_image_records: "BoardImageRecordStorageBase",
+        boards: "BoardServiceABC",
+        board_records: "BoardRecordStorageBase",
+        bulk_download: "BulkDownloadBase",
+        configuration: "InvokeAIAppConfig",
+        events: "EventServiceBase",
+        images: "ImageServiceABC",
+        videos: "VideoServiceABC",
+        audios: "AudioServiceABC",
+        image_files: "ImageFileStorageBase",
+        image_records: "ImageRecordStorageBase",
+        logger: "Logger",
+        model_images: "ModelImageFileStorageBase",
+        model_manager: "ModelManagerServiceBase",
+        model_relationships: "ModelRelationshipsServiceABC",
+        model_relationship_records: "ModelRelationshipRecordStorageBase",
+        download_queue: "DownloadQueueServiceBase",
+        performance_statistics: "InvocationStatsServiceBase",
+        session_queue: "SessionQueueBase",
+        session_processor: "SessionProcessorBase",
+        invocation_cache: "InvocationCacheBase",
+        names: "NameServiceBase",
+        urls: "UrlServiceBase",
+        workflow_records: "WorkflowRecordsStorageBase",
+        tensors: "ObjectSerializerBase[torch.Tensor]",
+        conditioning: "ObjectSerializerBase[ConditioningFieldData]",
+        style_preset_records: "StylePresetRecordsStorageBase",
+        style_preset_image_files: "StylePresetImageFileStorageBase",
+        workflow_thumbnails: "WorkflowThumbnailServiceBase",
+        client_state_persistence: "ClientStatePersistenceABC",
+    ):
+        self.board_images = board_images
+        self.board_image_records = board_image_records
+        self.boards = boards
+        self.board_records = board_records
+        self.bulk_download = bulk_download
+        self.configuration = configuration
+        self.events = events
+        self.images = images
+        self.videos = videos
+        self.audios = audios
+        self.image_files = image_files
+        self.image_records = image_records
+        self.logger = logger
+        self.model_images = model_images
+        self.model_manager = model_manager
+        self.model_relationships = model_relationships
+        self.model_relationship_records = model_relationship_records
+        self.download_queue = download_queue
+        self.performance_statistics = performance_statistics
+        self.session_queue = session_queue
+        self.session_processor = session_processor
+        self.invocation_cache = invocation_cache
+        self.names = names
+        self.urls = urls
+        self.workflow_records = workflow_records
+        self.tensors = tensors
+        self.conditioning = conditioning
+        self.style_preset_records = style_preset_records
+        self.style_preset_image_files = style_preset_image_files
+        self.workflow_thumbnails = workflow_thumbnails
+        self.client_state_persistence = client_state_persistence
+'''
+    write_file("d:\\Cat_InvokeAI\\invokeai\\invokeai\\app\\services\\invocation_services.py", content)
+
+def repair_dependencies():
+    # Based on official SHA 466a57f804c14bb1c51610da98ec29391c67d777
+    # Added: Video/Audio service initialization and passing to InvocationServices
+    content = r'''# Copyright (c) 2022 Kyle Schouviller (https://github.com/kyle0654)
+
+import asyncio
+from logging import Logger
+
+import torch
+
+from invokeai.app.services.board_image_records.board_image_records_sqlite import SqliteBoardImageRecordStorage
+from invokeai.app.services.board_images.board_images_default import BoardImagesService
+from invokeai.app.services.board_records.board_records_sqlite import SqliteBoardRecordStorage
+from invokeai.app.services.boards.boards_default import BoardService
+from invokeai.app.services.bulk_download.bulk_download_default import BulkDownloadService
+from invokeai.app.services.client_state_persistence.client_state_persistence_sqlite import ClientStatePersistenceSqlite
+from invokeai.app.services.config.config_default import InvokeAIAppConfig
+from invokeai.app.services.download.download_default import DownloadQueueService
+from invokeai.app.services.events.events_fastapievents import FastAPIEventService
+from invokeai.app.services.image_files.image_files_disk import DiskImageFileStorage
+from invokeai.app.services.image_records.image_records_sqlite import SqliteImageRecordStorage
+from invokeai.app.services.images.images_default import ImageService
+from invokeai.app.services.video.video_default import VideoService
+from invokeai.app.services.audio.audio_default import AudioService
+from invokeai.app.services.invocation_cache.invocation_cache_memory import MemoryInvocationCache
+from invokeai.app.services.invocation_services import InvocationServices
+from invokeai.app.services.invocation_stats.invocation_stats_default import InvocationStatsService
+from invokeai.app.services.invoker import Invoker
+from invokeai.app.services.model_images.model_images_default import ModelImageFileStorageDisk
+from invokeai.app.services.model_manager.model_manager_default import ModelManagerService
+from invokeai.app.services.model_records.model_records_sql import ModelRecordServiceSQL
+from invokeai.app.services.model_relationship_records.model_relationship_records_sqlite import (
+    SqliteModelRelationshipRecordStorage,
+)
+from invokeai.app.services.model_relationships.model_relationships_default import ModelRelationshipsService
+from invokeai.app.services.names.names_default import SimpleNameService
+from invokeai.app.services.object_serializer.object_serializer_disk import ObjectSerializerDisk
+from invokeai.app.services.object_serializer.object_serializer_forward_cache import ObjectSerializerForwardCache
+from invokeai.app.services.session_processor.session_processor_default import (
+    DefaultSessionProcessor,
+    DefaultSessionRunner,
+)
+from invokeai.app.services.session_queue.session_queue_sqlite import SqliteSessionQueue
+from invokeai.app.services.shared.sqlite.sqlite_util import init_db
+from invokeai.app.services.style_preset_images.style_preset_images_disk import StylePresetImageFileStorageDisk
+from invokeai.app.services.style_preset_records.style_preset_records_sqlite import SqliteStylePresetRecordsStorage
+from invokeai.app.services.urls.urls_default import LocalUrlService
+from invokeai.app.services.workflow_records.workflow_records_sqlite import SqliteWorkflowRecordsStorage
+from invokeai.app.services.workflow_thumbnails.workflow_thumbnails_disk import WorkflowThumbnailFileStorageDisk
+from invokeai.backend.stable_diffusion.diffusion.conditioning_data import (
+    BasicConditioningInfo,
+    CogView4ConditioningInfo,
+    ConditioningFieldData,
+    FLUXConditioningInfo,
+    SD3ConditioningInfo,
+    SDXLConditioningInfo,
+    ZImageConditioningInfo,
+)
+from invokeai.backend.util.logging import InvokeAILogger
+from invokeai.version.invokeai_version import __version__
+
+
+# TODO: is there a better way to achieve this?
+def check_internet() -> bool:
+    """
+    Return true if the internet is reachable.
+    It does this by pinging huggingface.co.
+    """
+    import urllib.request
+
+    host = "http://huggingface.co"
+    try:
+        urllib.request.urlopen(host, timeout=1)
+        return True
+    except Exception:
+        return False
+
+
+logger = InvokeAILogger.get_logger()
+
+
+class ApiDependencies:
+    """Contains and initializes all dependencies for the API"""
+
+    invoker: Invoker
+
+    @staticmethod
+    def initialize(
+        config: InvokeAIAppConfig,
+        event_handler_id: int,
+        loop: asyncio.AbstractEventLoop,
+        logger: Logger = logger,
+    ) -> None:
+        logger.info(f"InvokeAI version {__version__}")
+        logger.info(f"Root directory = {str(config.root_path)}")
+
+        output_folder = config.outputs_path
+        if output_folder is None:
+            raise ValueError("Output folder is not set")
+
+        image_files = DiskImageFileStorage(f"{output_folder}/images")
+
+        model_images_folder = config.models_path
+        style_presets_folder = config.style_presets_path
+        workflow_thumbnails_folder = config.workflow_thumbnails_path
+
+        db = init_db(config=config, logger=logger, image_files=image_files)
+
+        configuration = config
+        logger = logger
+
+        board_image_records = SqliteBoardImageRecordStorage(db=db)
+        board_images = BoardImagesService()
+        board_records = SqliteBoardRecordStorage(db=db)
+        boards = BoardService()
+        events = FastAPIEventService(event_handler_id, loop=loop)
+        bulk_download = BulkDownloadService()
+        image_records = SqliteImageRecordStorage(db=db)
+        images = ImageService()
+        videos = VideoService()
+        audios = AudioService()
+        invocation_cache = MemoryInvocationCache(max_cache_size=config.node_cache_size)
+        tensors = ObjectSerializerForwardCache(
+            ObjectSerializerDisk[torch.Tensor](
+                output_folder / "tensors",
+                safe_globals=[torch.Tensor],
+                ephemeral=True,
+            ),
+        )
+        conditioning = ObjectSerializerForwardCache(
+            ObjectSerializerDisk[ConditioningFieldData](
+                output_folder / "conditioning",
+                safe_globals=[
+                    ConditioningFieldData,
+                    BasicConditioningInfo,
+                    SDXLConditioningInfo,
+                    FLUXConditioningInfo,
+                    SD3ConditioningInfo,
+                    CogView4ConditioningInfo,
+                    ZImageConditioningInfo,
+                ],
+                ephemeral=True,
+            ),
+        )
+        download_queue_service = DownloadQueueService(app_config=configuration, event_bus=events)
+        model_images_service = ModelImageFileStorageDisk(model_images_folder / "model_images")
+        model_manager = ModelManagerService.build_model_manager(
+            app_config=configuration,
+            model_record_service=ModelRecordServiceSQL(db=db, logger=logger),
+            download_queue=download_queue_service,
+            events=events,
+        )
+        model_relationships = ModelRelationshipsService()
+        model_relationship_records = SqliteModelRelationshipRecordStorage(db=db)
+        names = SimpleNameService()
+        performance_statistics = InvocationStatsService()
+        session_processor = DefaultSessionProcessor(session_runner=DefaultSessionRunner())
+        session_queue = SqliteSessionQueue(db=db)
+        urls = LocalUrlService()
+        workflow_records = SqliteWorkflowRecordsStorage(db=db)
+        style_preset_records = SqliteStylePresetRecordsStorage(db=db)
+        style_preset_image_files = StylePresetImageFileStorageDisk(style_presets_folder / "images")
+        workflow_thumbnails = WorkflowThumbnailFileStorageDisk(workflow_thumbnails_folder)
+        client_state_persistence = ClientStatePersistenceSqlite(db=db)
+
+        services = InvocationServices(
+            board_image_records=board_image_records,
+            board_images=board_images,
+            board_records=board_records,
+            boards=boards,
+            bulk_download=bulk_download,
+            configuration=configuration,
+            events=events,
+            image_files=image_files,
+            image_records=image_records,
+            images=images,
+            videos=videos,
+            audios=audios,
+            invocation_cache=invocation_cache,
+            logger=logger,
+            model_images=model_images_service,
+            model_manager=model_manager,
+            model_relationships=model_relationships,
+            model_relationship_records=model_relationship_records,
+            download_queue=download_queue_service,
+            names=names,
+            performance_statistics=performance_statistics,
+            session_processor=session_processor,
+            session_queue=session_queue,
+            urls=urls,
+            workflow_records=workflow_records,
+            tensors=tensors,
+            conditioning=conditioning,
+            style_preset_records=style_preset_records,
+            style_preset_image_files=style_preset_image_files,
+            workflow_thumbnails=workflow_thumbnails,
+            client_state_persistence=client_state_persistence,
+        )
+
+        ApiDependencies.invoker = Invoker(services)
+        db.clean()
+
+    @staticmethod
+    def shutdown() -> None:
+        if ApiDependencies.invoker:
+            ApiDependencies.invoker.stop()
+'''
+    write_file("d:\\Cat_InvokeAI\\invokeai\\invokeai\\app\\api\\dependencies.py", content)
+
+if __name__ == "__main__":
+    print("Starting repair...")
+    repair_invocation_context()
+    repair_invocation_services()
+    repair_dependencies()
+    print("Repair complete. Please verify with check_update.py or start the app.")

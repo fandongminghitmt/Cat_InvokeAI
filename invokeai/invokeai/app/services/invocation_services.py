@@ -26,6 +26,38 @@ if TYPE_CHECKING:
     from invokeai.app.services.images.images_base import ImageServiceABC
     from invokeai.app.services.video.video_base import VideoServiceABC
     from invokeai.app.services.audio.audio_base import AudioServiceABC
+    from invokeai.app.services.invocation_cache.invocation_cache_base import InvocationCacheBase
+    from invokeai.app.services.invocation_stats.invocation_stats_base import InvocationStatsServiceBase
+    from invokeai.app.services.model_images.model_images_base import ModelImageFileStorageBase
+    from invokeai.app.services.model_manager.model_manager_base import ModelManagerServiceBase
+    from invokeai.app.services.model_relationship_records.model_relationship_records_base import (
+        ModelRelationshipRecordStorageBase,
+    )
+    from invokeai.app.services.model_relationships.model_relationships_base import ModelRelationshipsServiceABC
+    from invokeai.app.services.names.names_base import NameServiceBase
+    from invokeai.app.services.session_processor.session_processor_base import SessionProcessorBase
+    from invokeai.app.services.session_queue.session_queue_base import SessionQueueBase
+    from invokeai.app.services.urls.urls_base import UrlServiceBase
+    from invokeai.app.services.workflow_records.workflow_records_base import WorkflowRecordsStorageBase
+    from invokeai.app.services.workflow_thumbnails.workflow_thumbnails_base import WorkflowThumbnailServiceBase
+    from invokeai.backend.stable_diffusion.diffusion.conditioning_data import ConditioningFieldData
+
+
+class InvocationServices:
+    """Services that can be used by invocations"""
+
+    def __init__(
+        self,
+        board_images: "BoardImagesServiceABC",
+        board_image_records: "BoardImageRecordStorageBase",
+        boards: "BoardServiceABC",
+        board_records: "BoardRecordStorageBase",
+        bulk_download: "BulkDownloadBase",
+        configuration: "InvokeAIAppConfig",
+        events: "EventServiceBase",
+        images: "ImageServiceABC",
+        videos: "VideoServiceABC",
+        audios: "AudioServiceABC",
         image_files: "ImageFileStorageBase",
         image_records: "ImageRecordStorageBase",
         logger: "Logger",
@@ -56,7 +88,7 @@ if TYPE_CHECKING:
         self.configuration = configuration
         self.events = events
         self.images = images
-self.videos = videos
+        self.videos = videos
         self.audios = audios
         self.image_files = image_files
         self.image_records = image_records
