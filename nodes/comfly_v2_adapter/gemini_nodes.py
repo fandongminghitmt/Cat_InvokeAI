@@ -267,8 +267,19 @@ class ComflyGeminiNanoBananaInvocation(BaseInvocation, WithMetadata):
         pil_image = None
         
         if "b64_json" in first_image:
-            img_bytes = base64.b64decode(first_image["b64_json"])
-            pil_image = Image.open(io.BytesIO(img_bytes))
+            b64_str = first_image["b64_json"]
+            if b64_str.startswith("data:image"):
+                b64_str = b64_str.split(",", 1)[1]
+            try:
+                img_bytes = base64.b64decode(b64_str)
+                # Debug info
+                # print(f"[ComflyBanana] Decoded {len(img_bytes)} bytes")
+                # print(f"[ComflyBanana] Header: {img_bytes[:10]}")
+                pil_image = Image.open(io.BytesIO(img_bytes))
+            except Exception as e:
+                print(f"[ComflyBanana] Failed to decode/open image: {e}")
+                # print(f"[ComflyBanana] Base64 snippet: {b64_str[:50]}...")
+                raise e
         elif "url" in first_image:
             import requests
             img_url = first_image["url"]
