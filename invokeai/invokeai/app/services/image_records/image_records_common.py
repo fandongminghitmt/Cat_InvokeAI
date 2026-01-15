@@ -229,6 +229,8 @@ class ImageNamesResult(BaseModel):
     image_names: list[str] = Field(description="Ordered list of image names")
     starred_count: int = Field(description="Number of starred images (when starred_first=True)")
     total_count: int = Field(description="Total number of images matching the query")
+
+
 class VideoRecord(BaseModelExcludeNull):
     """Deserialized video record without metadata."""
 

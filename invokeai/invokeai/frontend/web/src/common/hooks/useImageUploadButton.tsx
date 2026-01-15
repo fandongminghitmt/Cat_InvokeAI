@@ -24,11 +24,8 @@ export const dropzoneAccept: Accept = {
   'image/png': ['.png'].reduce(addUpperCaseReducer, [] as string[]),
   'image/jpeg': ['.jpg', '.jpeg', '.png'].reduce(addUpperCaseReducer, [] as string[]),
   'image/webp': ['.webp'].reduce(addUpperCaseReducer, [] as string[]),
-<<<<<<< HEAD
   'video/mp4': ['.mp4'].reduce(addUpperCaseReducer, [] as string[]),
   'audio/mpeg': ['.mp3'].reduce(addUpperCaseReducer, [] as string[]),
-=======
->>>>>>> upstream/main
 };
 
 type UseImageUploadButtonArgs =

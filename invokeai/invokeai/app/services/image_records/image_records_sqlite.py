@@ -36,9 +36,6 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
                     """,
                     (image_name,),
                 )
-=======
-
-
                 result = cast(Optional[sqlite3.Row], cursor.fetchone())
             except sqlite3.Error as e:
                 raise ImageRecordNotFoundException from e
@@ -146,6 +143,49 @@ class SqliteImageRecordStorage(ImageRecordStorageBase):
     ) -> OffsetPaginatedResults[ImageRecord]:
         # NOTE: get_many is used for internal iteration, not gallery display usually.
         # Keeping it strictly for images to avoid breaking things that expect ImageRecord structure.
+        with self._db.transaction() as cursor:
+            # Manually build two queries - one for the count, one for the records
+            count_query = """--sql
+            SELECT COUNT(*)
+            FROM images
+            LEFT JOIN board_images ON board_images.image_name = images.image_name
+            WHERE 1=1
+            """
+
+            images_query = f"""--sql
+            SELECT {IMAGE_DTO_COLS}
+            FROM images
+            LEFT JOIN board_images ON board_images.image_name = images.image_name
+            WHERE 1=1
+            """
+
+            query_conditions = ""
+            query_params: list[Union[int, str, bool]] = []
+
+            if image_origin is not None:
+                query_conditions += """--sql
+                AND images.image_origin = ?
+                """
+                query_params.append(image_origin.value)
+
+            if categories is not None:
+                # Convert the enum values to unique list of strings
+                category_strings = [c.value for c in set(categories)]
+                # Create the correct length of placeholders
+                placeholders = ",".join("?" * len(category_strings))
+
+                query_conditions += f"""--sql
+                AND images.image_category IN ( {placeholders} )
+                """
+
+                # Unpack the included categories into the query params
+                for c in category_strings:
+                    query_params.append(c)
+
+            if is_intermediate is not None:
+                query_conditions += """--sql
+                AND images.is_intermediate = ?
+                """
                 query_params.append(is_intermediate)
 
             # board_id of "none" is reserved for images without a board

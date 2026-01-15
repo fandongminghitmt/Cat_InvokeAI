@@ -368,21 +368,9 @@ export const dataURLToImageData = (dataURL: string, width: number, height: numbe
   });
 };
 
-<<<<<<< HEAD
 export const konvaNodeToCanvas = (arg: { node: Konva.Node; rect?: Rect; bg?: string }): HTMLCanvasElement => {
   const { node, rect, bg } = arg;
   const canvas = node.toCanvas({ ...(rect ?? {}), imageSmoothingEnabled: false, pixelRatio: 1 });
-=======
-export const konvaNodeToCanvas = (arg: {
-  node: Konva.Node;
-  rect?: Rect;
-  bg?: string;
-  imageSmoothingEnabled?: boolean;
-  pixelRatio?: number;
-}): HTMLCanvasElement => {
-  const { node, rect, bg, imageSmoothingEnabled = false, pixelRatio = 1 } = arg;
-  const canvas = node.toCanvas({ ...(rect ?? {}), imageSmoothingEnabled, pixelRatio });
->>>>>>> upstream/main
 
   if (!bg) {
     return canvas;
@@ -394,11 +382,7 @@ export const konvaNodeToCanvas = (arg: {
   bgCanvas.height = canvas.height;
   const bgCtx = bgCanvas.getContext('2d');
   assert(bgCtx !== null, 'bgCtx is null');
-<<<<<<< HEAD
   bgCtx.imageSmoothingEnabled = false;
-=======
-  bgCtx.imageSmoothingEnabled = imageSmoothingEnabled;
->>>>>>> upstream/main
   bgCtx.fillStyle = bg;
   bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
   bgCtx.drawImage(canvas, 0, 0);
@@ -435,21 +419,9 @@ export const canvasToImageData = (canvas: HTMLCanvasElement): ImageData => {
  * @param rect - The bounding box to crop to
  * @returns A Promise that resolves with ImageData object of the node cropped to the bounding box
  */
-<<<<<<< HEAD
 export const konvaNodeToImageData = (arg: { node: Konva.Node; rect?: Rect; bg?: string }): ImageData => {
   const { node, rect, bg } = arg;
   const canvas = konvaNodeToCanvas({ node, rect, bg });
-=======
-export const konvaNodeToImageData = (arg: {
-  node: Konva.Node;
-  rect?: Rect;
-  bg?: string;
-  imageSmoothingEnabled?: boolean;
-  pixelRatio?: number;
-}): ImageData => {
-  const { node, rect, bg, imageSmoothingEnabled, pixelRatio } = arg;
-  const canvas = konvaNodeToCanvas({ node, rect, bg, imageSmoothingEnabled, pixelRatio });
->>>>>>> upstream/main
   return canvasToImageData(canvas);
 };
 
@@ -459,21 +431,9 @@ export const konvaNodeToImageData = (arg: {
  * @param rect - The bounding box to crop to
  * @returns A Promise that resolves to the Blob or null,
  */
-<<<<<<< HEAD
 export const konvaNodeToBlob = (arg: { node: Konva.Node; rect?: Rect; bg?: string }): Promise<Blob> => {
   const { node, rect, bg } = arg;
   const canvas = konvaNodeToCanvas({ node, rect, bg });
-=======
-export const konvaNodeToBlob = (arg: {
-  node: Konva.Node;
-  rect?: Rect;
-  bg?: string;
-  imageSmoothingEnabled?: boolean;
-  pixelRatio?: number;
-}): Promise<Blob> => {
-  const { node, rect, bg, imageSmoothingEnabled, pixelRatio } = arg;
-  const canvas = konvaNodeToCanvas({ node, rect, bg, imageSmoothingEnabled, pixelRatio });
->>>>>>> upstream/main
   return canvasToBlob(canvas);
 };
 

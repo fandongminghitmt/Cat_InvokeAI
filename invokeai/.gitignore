@@ -192,9 +192,3 @@ installer/InvokeAI-Installer/
 .aider*
 
 .claude/
-<<<<<<< HEAD
-=======
-
-# Weblate configuration file
-weblate.ini
->>>>>>> upstream/main

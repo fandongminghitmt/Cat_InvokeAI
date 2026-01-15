@@ -21,7 +21,7 @@ async def add_image_to_board(
     image_name: str = Body(description="The name of the image to add"),
 ) -> AddImagesToBoardResult:
     """Creates a board_image"""
-
+    print(f"DEBUG: add_image_to_board single called board_id={board_id} image_name={image_name}")
     try:
         added_images: set[str] = set()
         affected_boards: set[str] = set()
@@ -84,3 +84,58 @@ async def add_images_to_board(
 ) -> AddImagesToBoardResult:
     """Adds a list of images to a board"""
     print(f"DEBUG: add_images_to_board batch called board_id={board_id} images={image_names}")
+    try:
+        added_images: set[str] = set()
+        affected_boards: set[str] = set()
+        for image_name in image_names:
+            try:
+                old_board_id = ApiDependencies.invoker.services.images.get_dto(image_name).board_id or "none"
+                ApiDependencies.invoker.services.board_images.add_image_to_board(
+                    board_id=board_id,
+                    image_name=image_name,
+                )
+                added_images.add(image_name)
+                affected_boards.add(board_id)
+                affected_boards.add(old_board_id)
+
+            except Exception:
+                pass
+        return AddImagesToBoardResult(
+            added_images=list(added_images),
+            affected_boards=list(affected_boards),
+        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to add images to board")
+
+
+@board_images_router.post(
+    "/batch/delete",
+    operation_id="remove_images_from_board",
+    responses={
+        201: {"description": "Images were removed from board successfully"},
+    },
+    status_code=201,
+    response_model=RemoveImagesFromBoardResult,
+)
+async def remove_images_from_board(
+    image_names: list[str] = Body(description="The names of the images to remove", embed=True),
+) -> RemoveImagesFromBoardResult:
+    """Removes a list of images from their board, if they had one"""
+    try:
+        removed_images: set[str] = set()
+        affected_boards: set[str] = set()
+        for image_name in image_names:
+            try:
+                old_board_id = ApiDependencies.invoker.services.images.get_dto(image_name).board_id or "none"
+                ApiDependencies.invoker.services.board_images.remove_image_from_board(image_name=image_name)
+                removed_images.add(image_name)
+                affected_boards.add("none")
+                affected_boards.add(old_board_id)
+            except Exception:
+                pass
+        return RemoveImagesFromBoardResult(
+            removed_images=list(removed_images),
+            affected_boards=list(affected_boards),
+        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to remove images from board")

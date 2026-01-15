@@ -22,6 +22,16 @@ from invokeai.app.invocations.fields import (
     ImageField,
     VideoField,
     AudioField,
+    Input,
+    InputField,
+    LatentsField,
+    OutputField,
+    SD3ConditioningField,
+    TensorField,
+    UIComponent,
+    ZImageConditioningField,
+)
+from invokeai.app.services.images.images_common import ImageDTO, VideoDTO, AudioDTO
 from invokeai.app.services.shared.invocation_context import InvocationContext
 
 """
@@ -282,6 +292,7 @@ class ImageCollectionInvocation(BaseInvocation):
 
 # endregion
 
+
 # region Video
 
 
@@ -403,6 +414,8 @@ class AudioCollectionInvocation(BaseInvocation):
 
 
 # endregion
+
+
 # region DenoiseMask
 
 

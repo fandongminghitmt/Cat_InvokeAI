@@ -241,7 +241,6 @@ class ModelCache:
         """Set the CacheStats object for collecting cache statistics."""
         self._stats = stats
 
-
     def _record_activity(self) -> None:
         """Record model activity and reset the timeout timer if configured.
 

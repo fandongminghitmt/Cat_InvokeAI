@@ -20,7 +20,6 @@ import { useBoardName } from 'services/api/hooks/useBoardName';
 import type { UploadImageArg } from 'services/api/types';
 import { z } from 'zod';
 
-<<<<<<< HEAD
 const ACCEPTED_IMAGE_TYPES = [
   'image/png',
   'image/jpg',
@@ -31,10 +30,6 @@ const ACCEPTED_IMAGE_TYPES = [
   'audio/mp3',
 ];
 const ACCEPTED_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mp3'];
-=======
-const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'];
-const ACCEPTED_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
->>>>>>> upstream/main
 
 // const MAX_IMAGE_SIZE = 4; //In MegaBytes
 // const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {

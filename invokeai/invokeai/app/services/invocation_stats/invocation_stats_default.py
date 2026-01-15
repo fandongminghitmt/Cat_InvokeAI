@@ -81,7 +81,6 @@ class InvocationStatsService(InvocationStatsServiceBase):
         graph_stats_summary = self._get_graph_summary(graph_execution_state_id)
         node_stats_summaries = self._get_node_summaries(graph_execution_state_id)
         model_cache_stats_summary = self._get_model_cache_summary(graph_execution_state_id)
-
         vram_usage_gb = torch.cuda.memory_allocated() / GB if torch.cuda.is_available() else None
 
         return InvocationStatsSummary(

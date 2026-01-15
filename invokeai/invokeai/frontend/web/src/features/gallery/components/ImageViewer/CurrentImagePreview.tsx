@@ -16,12 +16,9 @@ import { NoContentForViewer } from './NoContentForViewer';
 import { ProgressImage } from './ProgressImage2';
 import { ProgressIndicator } from './ProgressIndicator2';
 
-<<<<<<< HEAD
 const isVideo = (name: string) => /\.(mp4|webm|mov)$/i.test(name);
 const isAudio = (name: string) => /\.(mp3|wav|ogg)$/i.test(name);
 
-=======
->>>>>>> upstream/main
 export const CurrentImagePreview = memo(({ imageDTO }: { imageDTO: ImageDTO | null }) => {
   const shouldShowItemDetails = useAppSelector(selectShouldShowItemDetails);
   const shouldShowProgressInViewer = useAppSelector(selectShouldShowProgressInViewer);
@@ -63,7 +60,6 @@ export const CurrentImagePreview = memo(({ imageDTO }: { imageDTO: ImageDTO | nu
           alignItems="center"
           justifyContent="center"
         >
-<<<<<<< HEAD
           {isVideo(imageDTO.image_name) ? (
             <video controls autoPlay src={imageDTO.image_url} style={{ maxWidth: '100%', maxHeight: '100%' }} />
           ) : isAudio(imageDTO.image_name) ? (
@@ -71,9 +67,6 @@ export const CurrentImagePreview = memo(({ imageDTO }: { imageDTO: ImageDTO | nu
           ) : (
             <DndImage imageDTO={imageDTO} onLoad={onLoadImage} borderRadius="base" />
           )}
-=======
-          <DndImage imageDTO={imageDTO} onLoad={onLoadImage} borderRadius="base" />
->>>>>>> upstream/main
         </Flex>
       )}
       {!imageDTO && <NoContentForViewer />}

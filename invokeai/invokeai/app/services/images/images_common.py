@@ -63,6 +63,8 @@ class AddImagesToBoardResult(ResultWithAffectedBoards):
 
 class RemoveImagesFromBoardResult(ResultWithAffectedBoards):
     removed_images: list[str] = Field(description="The image names that were removed from their board")
+
+
 class VideoUrlsDTO(BaseModelExcludeNull):
     """The URLs for a video and its thumbnail."""
 

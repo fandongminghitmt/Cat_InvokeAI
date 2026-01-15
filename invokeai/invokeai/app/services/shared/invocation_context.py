@@ -14,6 +14,8 @@ from invokeai.app.services.boards.boards_common import BoardDTO
 from invokeai.app.services.config.config_default import InvokeAIAppConfig
 from invokeai.app.services.image_records.image_records_common import ImageCategory, ResourceOrigin
 from invokeai.app.services.images.images_common import ImageDTO, VideoDTO, AudioDTO
+from invokeai.app.services.video.video_base import VideoServiceABC
+from invokeai.app.services.audio.audio_base import AudioServiceABC
 from invokeai.app.services.invocation_services import InvocationServices
 from invokeai.app.services.model_records.model_records_base import UnknownModelException
 from invokeai.app.services.session_processor.session_processor_common import ProgressImage
@@ -288,7 +290,6 @@ class ImagesInterface(InvocationContextInterface):
         """
         return Path(self._services.images.get_path(image_name, thumbnail))
 
-
 class VideosInterface(InvocationContextInterface):
     def __init__(self, services: InvocationServices, data: InvocationContextData) -> None:
         super().__init__(services, data)
@@ -319,6 +320,7 @@ class AudiosInterface(InvocationContextInterface):
             The audio as a AudioDTO object.
         """
         return self._services.audios.get_dto(audio_name)
+
 
 
 class TensorsInterface(InvocationContextInterface):
@@ -521,17 +523,93 @@ class ModelsInterface(InvocationContextInterface):
             Path to the downloaded model
         """
         self._util.signal_progress(f"Downloading model {source}")
-        return self._services.model_manager.load.download_and_cache_model(source)
+        return self._services.model_manager.install.download_and_cache_model(source=source)
+
+    def load_local_model(
+        self,
+        model_path: Path,
+        loader: Optional[Callable[[Path], AnyModel]] = None,
+    ) -> LoadedModelWithoutConfig:
+        """
+        Load the model file located at the indicated path
+
+        If a loader callable is provided, it will be invoked to load the model. Otherwise,
+        `safetensors.torch.load_file()` or `torch.load()` will be called to load the model.
+
+        Be aware that the LoadedModelWithoutConfig object has no `config` attribute
+
+        Args:
+            path: A model Path
+            loader: A Callable that expects a Path and returns a dict[str|int, Any]
+
+        Returns:
+            A LoadedModelWithoutConfig object.
+        """
+
+        self._util.signal_progress(f"Loading model {model_path.name}")
+        return self._services.model_manager.load.load_model_from_path(model_path=model_path, loader=loader)
+
+    def load_remote_model(
+        self,
+        source: str | AnyHttpUrl,
+        loader: Optional[Callable[[Path], AnyModel]] = None,
+    ) -> LoadedModelWithoutConfig:
+        """
+        Download, cache, and load the model file located at the indicated URL or repo_id.
+
+        If the model is already downloaded, it will be loaded from the cache.
+
+        If the a loader callable is provided, it will be invoked to load the model. Otherwise,
+        `safetensors.torch.load_file()` or `torch.load()` will be called to load the model.
+
+        Be aware that the LoadedModelWithoutConfig object has no `config` attribute
+
+        Args:
+            source: A URL or huggingface repoid.
+            loader: A Callable that expects a Path and returns a dict[str|int, Any]
+
+        Returns:
+            A LoadedModelWithoutConfig object.
+        """
+        model_path = self._services.model_manager.install.download_and_cache_model(source=str(source))
+
+        self._util.signal_progress(f"Loading model {source}")
+        return self._services.model_manager.load.load_model_from_path(model_path=model_path, loader=loader)
+
+    def get_absolute_path(self, config_or_path: AnyModelConfig | Path | str) -> Path:
+        """Gets the absolute path for a given model config or path.
+
+        For example, if the model's path is `flux/main/FLUX Dev.safetensors`, and the models path is
+        `/home/username/InvokeAI/models`, this method will return
+        `/home/username/InvokeAI/models/flux/main/FLUX Dev.safetensors`.
+
+        Args:
+            config_or_path: The model config or path.
+
+        Returns:
+            The absolute path to the model.
+        """
+
+        model_path = Path(config_or_path.path) if isinstance(config_or_path, Config_Base) else Path(config_or_path)
+
+        if model_path.is_absolute():
+            return model_path.resolve()
+
+        base_models_path = self._services.configuration.models_path
+        joined_path = base_models_path / model_path
+        resolved_path = joined_path.resolve()
+        return resolved_path
 
 
 class ConfigInterface(InvocationContextInterface):
     def get(self) -> InvokeAIAppConfig:
-        """Gets the app config.
+        """Gets the app's config.
 
         Returns:
-            The app config.
+            The app's config.
         """
-        return self._services.configuration.get_config()
+
+        return self._services.configuration
 
 
 class UtilInterface(InvocationContextInterface):
@@ -542,55 +620,127 @@ class UtilInterface(InvocationContextInterface):
         self._is_canceled = is_canceled
 
     def is_canceled(self) -> bool:
-        """Checks if the current invocation has been canceled.
+        """Checks if the current session has been canceled.
 
         Returns:
-            True if the invocation has been canceled, False otherwise.
+            True if the current session has been canceled, False if not.
         """
         return self._is_canceled()
 
-    def signal_progress(
-        self,
-        message: Optional[str] = None,
-        percentage: Optional[float] = None,
-        image: Optional[ProgressImage] = None,
-    ) -> None:
-        """Signals progress to the session processor.
+    def sd_step_callback(self, intermediate_state: PipelineIntermediateState, base_model: BaseModelType) -> None:
+        """
+        The step callback emits a progress event with the current step, the total number of
+        steps, a preview image, and some other internal metadata.
+
+        This should be called after each denoising step.
 
         Args:
-            message: The message to display.
-            percentage: The percentage of progress, between 0 and 1.
-            image: The image to display.
+            intermediate_state: The intermediate state of the diffusion pipeline.
+            base_model: The base model for the current denoising step.
         """
-        self._services.session_processor.signal_progress(
-            self._data.queue_item,
-            self._data.invocation,
-            self._data.source_invocation_id,
-            message,
-            percentage,
-            image,
+
+        diffusion_step_callback(
+            signal_progress=self.signal_progress,
+            intermediate_state=intermediate_state,
+            base_model=base_model,
+            is_canceled=self.is_canceled,
         )
 
-    def sd_step_callback(self, intermediate_state: PipelineIntermediateState, base_model: BaseModelType) -> None:
-        """Callback to be called at each step of the diffusion process.
+    def flux_step_callback(self, intermediate_state: PipelineIntermediateState) -> None:
+        """
+        The step callback emits a progress event with the current step, the total number of
+        steps, a preview image, and some other internal metadata.
+
+        This should be called after each denoising step.
 
         Args:
-            intermediate_state: The intermediate state of the diffusion process.
-            base_model: The base model of the diffusion process.
+            intermediate_state: The intermediate state of the diffusion pipeline.
         """
+
         diffusion_step_callback(
-            self._services.session_processor,
-            self._data.queue_item,
-            self._data.invocation,
-            self._data.source_invocation_id,
-            intermediate_state,
-            base_model,
+            signal_progress=self.signal_progress,
+            intermediate_state=intermediate_state,
+            base_model=BaseModelType.Flux,
+            is_canceled=self.is_canceled,
+        )
+
+    def signal_progress(
+        self,
+        message: str,
+        percentage: float | None = None,
+        image: Image | None = None,
+        image_size: tuple[int, int] | None = None,
+    ) -> None:
+        """Signals the progress of some long-running invocation. The progress is displayed in the UI.
+
+        If a percentage is provided, the UI will display a progress bar and automatically append the percentage to the
+        message. You should not include the percentage in the message.
+
+        Example:
+            ```py
+            total_steps = 10
+            for i in range(total_steps):
+                percentage = i / (total_steps - 1)
+                context.util.signal_progress("Doing something cool", percentage)
+            ```
+
+        If an image is provided, the UI will display it. If your image should be displayed at a different size, provide
+        a tuple of `(width, height)` for the `image_size` parameter. The image will be displayed at the specified size
+        in the UI.
+
+        For example, SD denoising progress images are 1/8 the size of the original image, so you'd do this to ensure the
+        image is displayed at the correct size:
+            ```py
+            # Calculate the output size of the image (8x the progress image's size)
+            width = progress_image.width * 8
+            height = progress_image.height * 8
+            # Signal the progress with the image and output size
+            signal_progress("Denoising", percentage, progress_image, (width, height))
+            ```
+
+        If your progress image is very large, consider downscaling it to reduce the payload size and provide the original
+        size to the `image_size` parameter. The PIL `thumbnail` method is useful for this, as it maintains the aspect
+        ratio of the image:
+            ```py
+            # `thumbnail` modifies the image in-place, so we need to first make a copy
+            thumbnail_image = progress_image.copy()
+            # Resize the image to a maximum of 256x256 pixels, maintaining the aspect ratio
+            thumbnail_image.thumbnail((256, 256))
+            # Signal the progress with the thumbnail, passing the original size
+            signal_progress("Denoising", percentage, thumbnail, progress_image.size)
+            ```
+
+        Args:
+            message: A message describing the current status. Do not include the percentage in this message.
+            percentage: The current percentage completion for the process. Omit for indeterminate progress.
+            image: An optional image to display.
+            image_size: The optional size of the image to display. If omitted, the image will be displayed at its
+                original size.
+        """
+
+        self._services.events.emit_invocation_progress(
+            queue_item=self._data.queue_item,
+            invocation=self._data.invocation,
+            message=message,
+            percentage=percentage,
+            image=ProgressImage.build(image, image_size) if image else None,
         )
 
 
 class InvocationContext:
-    """
-    The InvocationContext provides access to various services and data about the current invocation.
+    """Provides access to various services and data for the current invocation.
+
+    Attributes:
+        images (ImagesInterface): Methods to save, get and update images and their metadata.
+        tensors (TensorsInterface): Methods to save and get tensors, including image, noise, masks, and masked images.
+        conditioning (ConditioningInterface): Methods to save and get conditioning data.
+        models (ModelsInterface): Methods to check if a model exists, get a model, and get a model's info.
+        logger (LoggerInterface): The app logger.
+        config (ConfigInterface): The app config.
+        util (UtilInterface): Utility methods, including a method to check if an invocation was canceled and step callbacks.
+        boards (BoardsInterface): Methods to interact with boards.
+        videos (VideosInterface): Methods to interact with videos.
+        audios (AudiosInterface): Methods to interact with audios.
     """
 
     def __init__(
@@ -609,25 +759,23 @@ class InvocationContext:
         services: InvocationServices,
     ) -> None:
         self.images = images
-        """Methods to interact with images."""
+        """Methods to save, get and update images and their metadata."""
         self.tensors = tensors
-        """Methods to interact with tensors."""
+        """Methods to save and get tensors, including image, noise, masks, and masked images."""
         self.conditioning = conditioning
-        """Methods to interact with conditioning data."""
+        """Methods to save and get conditioning data."""
         self.models = models
-        """Methods to interact with models."""
+        """Methods to check if a model exists, get a model, and get a model's info."""
         self.logger = logger
-        """Methods to log messages."""
+        """The app logger."""
         self.config = config
-        """Methods to interact with the app config."""
+        """The app config."""
         self.util = util
-        """Methods to interact with utility services."""
+        """Utility methods, including a method to check if an invocation was canceled and step callbacks."""
         self.boards = boards
-        """Methods to interact with boards."""
         self.videos = videos
-        """Methods to interact with videos."""
         self.audios = audios
-        """Methods to interact with audios."""
+        """Methods to interact with boards."""
         self._data = data
         """An internal API providing access to data about the current queue item and invocation. You probably shouldn't use this. It may change without warning."""
         self._services = services
@@ -662,17 +810,17 @@ def build_invocation_context(
 
     ctx = InvocationContext(
         images=images,
-        tensors=tensors,
-        conditioning=conditioning,
-        models=models,
         logger=logger,
         config=config,
+        tensors=tensors,
+        models=models,
+        data=data,
         util=util,
+        conditioning=conditioning,
+        services=services,
         boards=boards,
         videos=videos,
         audios=audios,
-        data=data,
-        services=services,
     )
 
     return ctx

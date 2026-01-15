@@ -27,11 +27,7 @@ export const InpaintMaskMenuItemsExtractMaskedArea = memo(() => {
       const maskAdapter = canvasManager.getAdapter(entityIdentifier);
       if (!maskAdapter) {
         log.error({ entityIdentifier }, 'Inpaint mask adapter not found when extracting masked area');
-<<<<<<< HEAD
         toast({ status: 'error', title: 'Unable to extract masked area.' });
-=======
-        toast({ status: 'error', title: t('controlLayers.extractMaskedAreaFailed') });
->>>>>>> upstream/main
         return;
       }
 
@@ -48,11 +44,7 @@ export const InpaintMaskMenuItemsExtractMaskedArea = memo(() => {
 
         // Abort when the canvas is effectively empty—no pixels to extract.
         if (rect.width <= 0 || rect.height <= 0) {
-<<<<<<< HEAD
           toast({ status: 'warning', title: 'Canvas is empty.' });
-=======
-          toast({ status: 'warning', title: t('controlLayers.maskLayerEmpty') });
->>>>>>> upstream/main
           return;
         }
 
@@ -82,11 +74,7 @@ export const InpaintMaskMenuItemsExtractMaskedArea = memo(() => {
             },
             'Mask and composite dimensions did not match when extracting masked area'
           );
-<<<<<<< HEAD
           toast({ status: 'error', title: 'Unable to extract masked area.' });
-=======
-          toast({ status: 'error', title: t('controlLayers.extractMaskedAreaFailed') });
->>>>>>> upstream/main
           return;
         }
 
@@ -94,11 +82,7 @@ export const InpaintMaskMenuItemsExtractMaskedArea = memo(() => {
         const maskArray = maskImageData.data;
 
         if (!compositeArray || !maskArray) {
-<<<<<<< HEAD
           toast({ status: 'error', title: 'Cannot extract: image or mask data is missing.' });
-=======
-          toast({ status: 'error', title: t('controlLayers.extractMaskedAreaMissingData') });
->>>>>>> upstream/main
           return;
         }
 
@@ -153,17 +137,10 @@ export const InpaintMaskMenuItemsExtractMaskedArea = memo(() => {
         });
       } catch (error) {
         log.error({ error: serializeError(error as Error) }, 'Failed to extract masked area to raster layer');
-<<<<<<< HEAD
         toast({ status: 'error', title: 'Unable to extract masked area.' });
       }
     })();
   }, [canvasManager, entityIdentifier]);
-=======
-        toast({ status: 'error', title: t('controlLayers.extractMaskedAreaFailed') });
-      }
-    })();
-  }, [canvasManager, entityIdentifier, t]);
->>>>>>> upstream/main
 
   return (
     <MenuItem onClick={onExtract} icon={<PiSelectionBackgroundBold />} isDisabled={isBusy}>

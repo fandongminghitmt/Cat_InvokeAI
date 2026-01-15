@@ -7,12 +7,6 @@ export type Feature =
   | 'paramNegativeConditioning'
   | 'paramPositiveConditioning'
   | 'paramScheduler'
-<<<<<<< HEAD
-=======
-  | 'seedVarianceEnhancer'
-  | 'seedVarianceStrength'
-  | 'seedVarianceRandomizePercent'
->>>>>>> upstream/main
   | 'compositingMaskBlur'
   | 'compositingBlurMethod'
   | 'compositingCoherencePass'
