@@ -192,3 +192,12 @@ installer/InvokeAI-Installer/
 .aider*
 
 .claude/
+
+# =======================================================
+# USER OVERRIDE: Force include everything in invokeai package
+# =======================================================
+!invokeai/invokeai/**
+
+# Re-ignore python cache and compiled files to avoid conflicts
+invokeai/invokeai/**/__pycache__/
+invokeai/invokeai/**/*.py[cod]
