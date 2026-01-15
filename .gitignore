@@ -1,13 +1,13 @@
 .venv/
 SDXL/
-models/
-databases/
-outputs/
+/models/
+/databases/
+/outputs/
 *.pyc
 __pycache__/
 .env
 invokeai.yaml
-configs/
+/configs/
 invokeai.example.yaml
 Invoke.Community.Edition.Setup.latest.exe
 style_presets/
