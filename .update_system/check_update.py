@@ -33,7 +33,7 @@ def main():
     # Ensure init has happened
     if not os.path.exists(os.path.join(REPO_DIR, ".git")):
         print("首次运行，正在初始化更新系统... (First run, initializing update system...)")
-        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "init_repo.py")])
+        import sys; subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "init_repo.py")])
     
     print("正在检查 InvokeAI 官方更新... (Checking for official InvokeAI updates...)")
     
