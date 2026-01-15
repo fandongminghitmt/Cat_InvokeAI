@@ -2,11 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-<<<<<<< HEAD
 from invokeai.app.services.image_records.image_records_common import ImageRecord, VideoRecord, AudioRecord
-=======
-from invokeai.app.services.image_records.image_records_common import ImageRecord
->>>>>>> upstream/main
 from invokeai.app.util.model_exclude_null import BaseModelExcludeNull
 
 
@@ -67,9 +63,6 @@ class AddImagesToBoardResult(ResultWithAffectedBoards):
 
 class RemoveImagesFromBoardResult(ResultWithAffectedBoards):
     removed_images: list[str] = Field(description="The image names that were removed from their board")
-<<<<<<< HEAD
-
-
 class VideoUrlsDTO(BaseModelExcludeNull):
     """The URLs for a video and its thumbnail."""
 
@@ -100,5 +93,3 @@ class AudioDTO(AudioRecord, AudioUrlsDTO):
     board_id: Optional[str] = Field(
         default=None, description="The id of the board the audio belongs to, if one exists."
     )
-=======
->>>>>>> upstream/main

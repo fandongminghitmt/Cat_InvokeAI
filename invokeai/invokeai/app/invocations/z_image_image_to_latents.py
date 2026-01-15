@@ -20,40 +20,6 @@ from invokeai.backend.flux.modules.autoencoder import AutoEncoder as FluxAutoEnc
 from invokeai.backend.model_manager.load.load_base import LoadedModel
 from invokeai.backend.stable_diffusion.diffusers_pipeline import image_resized_to_grid_as_tensor
 from invokeai.backend.util.devices import TorchDevice
-<<<<<<< HEAD
-=======
-from invokeai.backend.util.vae_working_memory import estimate_vae_working_memory_flux
->>>>>>> upstream/main
-
-# Z-Image can use either the Diffusers AutoencoderKL or the FLUX AutoEncoder
-ZImageVAE = Union[AutoencoderKL, FluxAutoEncoder]
-
-
-@invocation(
-    "z_image_i2l",
-    title="Image to Latents - Z-Image",
-    tags=["image", "latents", "vae", "i2l", "z-image"],
-    category="image",
-    version="1.1.0",
-    classification=Classification.Prototype,
-)
-class ZImageImageToLatentsInvocation(BaseInvocation, WithMetadata, WithBoard):
-    """Generates latents from an image using Z-Image VAE (supports both Diffusers and FLUX VAE)."""
-
-    image: ImageField = InputField(description="The image to encode.")
-    vae: VAEField = InputField(description=FieldDescriptions.vae, input=Input.Connection)
-
-    @staticmethod
-    def vae_encode(vae_info: LoadedModel, image_tensor: torch.Tensor) -> torch.Tensor:
-        if not isinstance(vae_info.model, (AutoencoderKL, FluxAutoEncoder)):
-            raise TypeError(
-                f"Expected AutoencoderKL or FluxAutoEncoder for Z-Image VAE, got {type(vae_info.model).__name__}. "
-                "Ensure you are using a compatible VAE model."
-            )
-
-<<<<<<< HEAD
-        with vae_info.model_on_device() as (_, vae):
-=======
         # Estimate working memory needed for VAE encode
         estimated_working_memory = estimate_vae_working_memory_flux(
             operation="encode",
@@ -62,7 +28,6 @@ class ZImageImageToLatentsInvocation(BaseInvocation, WithMetadata, WithBoard):
         )
 
         with vae_info.model_on_device(working_mem_bytes=estimated_working_memory) as (_, vae):
->>>>>>> upstream/main
             if not isinstance(vae, (AutoencoderKL, FluxAutoEncoder)):
                 raise TypeError(
                     f"Expected AutoencoderKL or FluxAutoEncoder, got {type(vae).__name__}. "

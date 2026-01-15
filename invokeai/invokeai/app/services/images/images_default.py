@@ -136,88 +136,6 @@ class ImageService(ImageServiceABC):
 
     def get_dto(self, image_name: str) -> ImageDTO:
         try:
-<<<<<<< HEAD
-            # Try images first
-            try:
-                image_record = self.__invoker.services.image_records.get(image_name)
-                
-                image_dto = image_record_to_dto(
-                    image_record=image_record,
-                    image_url=self.__invoker.services.urls.get_image_url(image_name),
-                    thumbnail_url=self.__invoker.services.urls.get_image_url(image_name, True),
-                    board_id=self.__invoker.services.board_image_records.get_board_for_image(image_name),
-                )
-                return image_dto
-            except ImageRecordNotFoundException:
-                # Try videos
-                try:
-                    video_service = getattr(self.__invoker.services, 'videos', None)
-                    if video_service:
-                        video_record = video_service._VideoService__records.get(image_name) # Accessing private member for quick hack, better to expose method
-                        # Or use video_service.get_dto but that returns VideoDTO
-                        
-                        # Let's manually construct ImageDTO from VideoRecord
-                        # We treat video_url as image_url, but frontend might get confused if it tries to load it as img
-                        # Ideally image_url should point to thumbnail for gallery view?
-                        # But ImageViewer needs the real URL.
-                        
-                        base_url = "api/v1/media/video"
-                        return ImageDTO(
-                            image_name=video_record.video_name,
-                            image_origin=video_record.video_origin,
-                            image_category="general", # Hack: Force category to 'general' for frontend visibility
-                            image_url=f"{base_url}/{video_record.video_name}/full",
-                            thumbnail_url=f"{base_url}/{video_record.video_name}/thumbnail",
-                            width=video_record.width,
-                            height=video_record.height,
-                            created_at=str(video_record.created_at),
-                            updated_at=str(video_record.updated_at),
-                            deleted_at=str(video_record.deleted_at) if video_record.deleted_at else None,
-                            is_intermediate=video_record.is_intermediate,
-                            session_id=video_record.session_id,
-                            node_id=video_record.node_id,
-                            starred=video_record.starred,
-                            has_workflow=video_record.has_workflow,
-                            board_id=None
-                        )
-                except Exception:
-                    pass
-                
-                # Try audios
-                try:
-                    audio_service = getattr(self.__invoker.services, 'audios', None)
-                    if audio_service:
-                        audio_record = audio_service._AudioService__records.get(image_name)
-                        base_url = "api/v1/media/audio"
-                        return ImageDTO(
-                            image_name=audio_record.audio_name,
-                            image_origin=audio_record.audio_origin,
-                            image_category="general", # Hack: Force category to 'general' for frontend visibility
-                            image_url=f"{base_url}/{audio_record.audio_name}",
-                            thumbnail_url="", # Hack: Frontend requires string, not None.
-                            width=1, # Hack: Frontend requires width > 0
-                            height=1, # Hack: Frontend requires height > 0
-                            created_at=str(audio_record.created_at),
-                            updated_at=str(audio_record.updated_at),
-                            deleted_at=str(audio_record.deleted_at) if audio_record.deleted_at else None,
-                            is_intermediate=audio_record.is_intermediate,
-                            session_id=audio_record.session_id,
-                            node_id=audio_record.node_id,
-                            starred=audio_record.starred,
-                            has_workflow=audio_record.has_workflow,
-                            board_id=None
-                        )
-                except Exception:
-                    pass
-                
-                raise ImageRecordNotFoundException
-
-        except ImageRecordNotFoundException:
-            self.__invoker.services.logger.error("Image/Media record not found")
-            raise
-        except Exception as e:
-            self.__invoker.services.logger.error("Problem getting image/media DTO")
-=======
             image_record = self.__invoker.services.image_records.get(image_name)
 
             image_dto = image_record_to_dto(
@@ -233,7 +151,6 @@ class ImageService(ImageServiceABC):
             raise
         except Exception as e:
             self.__invoker.services.logger.error("Problem getting image DTO")
->>>>>>> upstream/main
             raise e
 
     def get_metadata(self, image_name: str) -> Optional[MetadataField]:
@@ -312,29 +229,15 @@ class ImageService(ImageServiceABC):
                 search_term,
             )
 
-<<<<<<< HEAD
-            image_dtos = []
-            for r in results.items:
-                # Hack: Fix dimensions for Audio/Video if they are 0, to pass frontend validation
-                if r.width == 0: r.width = 1
-                if r.height == 0: r.height = 1
-                
-                image_dtos.append(image_record_to_dto(
-=======
             image_dtos = [
                 image_record_to_dto(
->>>>>>> upstream/main
                     image_record=r,
                     image_url=self.__invoker.services.urls.get_image_url(r.image_name),
                     thumbnail_url=self.__invoker.services.urls.get_image_url(r.image_name, True),
                     board_id=self.__invoker.services.board_image_records.get_board_for_image(r.image_name),
-<<<<<<< HEAD
-                ))
-=======
                 )
                 for r in results.items
             ]
->>>>>>> upstream/main
 
             return OffsetPaginatedResults[ImageDTO](
                 items=image_dtos,
@@ -348,15 +251,7 @@ class ImageService(ImageServiceABC):
 
     def delete(self, image_name: str):
         try:
-<<<<<<< HEAD
-            try:
-                self.__invoker.services.image_files.delete(image_name)
-            except Exception:
-                self.__invoker.services.logger.warning(f"Failed to delete image file for {image_name}, but proceeding to delete record.")
-            
-=======
             self.__invoker.services.image_files.delete(image_name)
->>>>>>> upstream/main
             self.__invoker.services.image_records.delete(image_name)
             self._on_deleted(image_name)
         except ImageRecordDeleteException:

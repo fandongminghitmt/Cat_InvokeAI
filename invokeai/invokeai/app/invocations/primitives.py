@@ -20,25 +20,8 @@ from invokeai.app.invocations.fields import (
     FieldDescriptions,
     FluxConditioningField,
     ImageField,
-<<<<<<< HEAD
     VideoField,
     AudioField,
-=======
->>>>>>> upstream/main
-    Input,
-    InputField,
-    LatentsField,
-    OutputField,
-    SD3ConditioningField,
-    TensorField,
-    UIComponent,
-    ZImageConditioningField,
-)
-<<<<<<< HEAD
-from invokeai.app.services.images.images_common import ImageDTO, VideoDTO, AudioDTO
-=======
-from invokeai.app.services.images.images_common import ImageDTO
->>>>>>> upstream/main
 from invokeai.app.services.shared.invocation_context import InvocationContext
 
 """
@@ -299,8 +282,6 @@ class ImageCollectionInvocation(BaseInvocation):
 
 # endregion
 
-<<<<<<< HEAD
-
 # region Video
 
 
@@ -422,10 +403,6 @@ class AudioCollectionInvocation(BaseInvocation):
 
 
 # endregion
-
-
-=======
->>>>>>> upstream/main
 # region DenoiseMask
 
 
