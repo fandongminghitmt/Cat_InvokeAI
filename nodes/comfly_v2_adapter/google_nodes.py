@@ -49,7 +49,7 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
     
     use_board: Optional[str] = InputField(default=None, description="Board ID", input=Input.Direct)
     prompt: str = InputField(description="Text prompt describing the video to generate", ui_component="textarea")
-    model: Literal["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1", "veo3.1-pro", "veo3.1-components"] = InputField(default="veo3", description="Model to use")
+    model: Literal["veo3", "veo3-fast", "veo3-pro", "veo3-fast-frames", "veo3-pro-frames", "veo3.1", "veo3.1-pro", "veo3.1-components", "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"] = InputField(default="veo3", description="Model to use")
     enhance_prompt: bool = InputField(default=False, description="Enhance prompt using AI")
     aspect_ratio: Literal["16:9", "9:16"] = InputField(default="16:9", description="Aspect Ratio")
     
@@ -133,10 +133,10 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
         if self.seed > 0:
             payload["seed"] = self.seed
 
-        if self.model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro", "veo3.1-components"] and self.aspect_ratio:
+        if self.model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro", "veo3.1-components", "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"] and self.aspect_ratio:
             payload["aspect_ratio"] = self.aspect_ratio
 
-        if self.model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro", "veo3.1-components"] and self.enable_upsample:
+        if self.model in ["veo3", "veo3-fast", "veo3-pro", "veo3.1", "veo3.1-pro", "veo3.1-components", "veo3.1-4k", "veo3.1-pro-4k", "veo3.1-components-4k"] and self.enable_upsample:
             payload["enable_upsample"] = self.enable_upsample
 
         # Handle Images
@@ -155,7 +155,7 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
             payload["images"] = images_base64
 
         # 3. Submit Task
-        api_endpoint = f"{url_to_use}/google/v1/models/veo/videos"
+        api_endpoint = f"{url_to_use}/v2/videos/generations"
         
         msg_req = f"[ComflyVeo3] Sending request to {api_endpoint}"
         logger.info(msg_req)
@@ -177,20 +177,21 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
 
         result = response.json()
         
-        if result.get("code") != "success":
-            error_message = f"API returned error: {result.get('message', 'Unknown error')}"
-            raise Exception(error_message)
-            
-        task_id = result.get("data")
+        task_id = result.get("task_id")
         if not task_id:
-            raise Exception("No task ID returned from API")
+            # Fallback to old format just in case, or error out
+            task_id = result.get("data")
+        
+        if not task_id:
+            error_message = f"API Error: {result.get('message', 'No task ID returned')}"
+            raise Exception(error_message)
             
         msg_task = f"[ComflyVeo3] Task ID: {task_id}. Waiting for completion..."
         logger.info(msg_task)
         print(msg_task)
 
         # 4. Polling for Result
-        max_attempts = 150 
+        max_attempts = 600 
         attempts = 0
         video_url = None
         
@@ -200,7 +201,7 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
             
             try:
                 status_response = session.get(
-                    f"{url_to_use}/google/v1/tasks/{task_id}",
+                    f"{url_to_use}/v2/videos/generations/{task_id}",
                     headers=headers,
                     timeout=300
                 )
@@ -210,12 +211,8 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
                     
                 status_result = status_response.json()
                 
-                if status_result.get("code") != "success":
-                    continue
-                
-                data = status_result.get("data", {})
-                status = data.get("status", "")
-                progress = data.get("progress", "0%")
+                status = status_result.get("status", "")
+                progress = status_result.get("progress", "0%")
                 
                 # Log progress periodically
                 if attempts % 5 == 0:
@@ -223,11 +220,16 @@ class ComflyGoogleVeo3Invocation(BaseInvocation, WithMetadata):
                     print(f"[ComflyVeo3] Status: {status}, Progress: {progress}")
                 
                 if status == "SUCCESS":
-                    if "data" in data and "video_url" in data["data"]:
+                    data = status_result.get("data", {})
+                    if "output" in data:
+                        video_url = data["output"]
+                        break
+                    # Fallback for old API structure if needed, though unlikely with v2 endpoint
+                    elif "data" in data and "video_url" in data["data"]:
                         video_url = data["data"]["video_url"]
                         break
                 elif status == "FAILURE":
-                    fail_reason = data.get("fail_reason", "Unknown error")
+                    fail_reason = status_result.get("fail_reason", "Unknown error")
                     raise Exception(f"Video generation failed: {fail_reason}")
                     
             except Exception as e:
